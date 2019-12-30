@@ -1,9 +1,9 @@
-package com.example.syogibase.Model
+package com.example.syogibase.model
 
 
 import android.util.Log
-import com.example.syogibase.Model.Data.*
-import com.example.syogibase.Model.Data.Piece.*
+import com.example.syogibase.model.data.*
+import com.example.syogibase.model.data.Piece.*
 
 
 class BoardRepository {
@@ -13,6 +13,11 @@ class BoardRepository {
     private var previousX:Int = 0
     private var previousY:Int = 0
     private var previousPiece:Piece = None
+
+    companion object {
+        const val BLACK = 1
+        const val WHITE = 2
+    }
 
 
     //動かす前の駒の状態をセット
@@ -75,14 +80,13 @@ class BoardRepository {
         return count
     }
 
-    //先手の持ち駒リスト取得
-    fun getAllHoldPieceBlack():Map<Piece,Int>{
-        return board.holdPieceBlack
-    }
-
-    //後手の持ち駒リスト取得
-    fun getAllHoldPieceWhite():Map<Piece,Int>{
-        return board.holdPieceWhite
+    //持ち駒リスト取得
+    fun getAllHoldPiece(turn:Int):Map<Piece,Int>{
+        return if(turn == BLACK) {
+            board.holdPieceBlack
+        }else{
+            board.holdPieceWhite
+        }
     }
 
     //持ち駒マスから取得
@@ -149,7 +153,7 @@ class BoardRepository {
 
     //駒の動きを取得
     fun getMove(x:Int, y:Int):Array<Array<PieceMove>>{
-        return board.cells[x][y].piece.getMove()
+        return getPiece(x,y).getMove()
     }
 
     //ヒントセット

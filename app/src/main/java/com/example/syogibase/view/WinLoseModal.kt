@@ -1,14 +1,11 @@
-package com.example.syogibase.View
+package com.example.syogibase.view
 
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import com.example.syogibase.R
 
 //勝った時の勝敗表示View
 class WinLoseModal(context: Context, private val turn: Int) : View(context) {

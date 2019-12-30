@@ -1,4 +1,4 @@
-package com.example.syogibase.Model.Data
+package com.example.syogibase.model.data
 
 //将棋の駒格納クラス
 

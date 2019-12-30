@@ -1,4 +1,4 @@
-package com.example.syogibase.View
+package com.example.syogibase.view
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity

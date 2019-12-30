@@ -1,8 +1,8 @@
-package com.example.syogibase.Model.Data
+package com.example.syogibase.model.data
 
 //将棋盤定義クラス
 
-import com.example.syogibase.Model.Data.Piece.*
+import com.example.syogibase.model.data.Piece.*
 
 class Board{
 

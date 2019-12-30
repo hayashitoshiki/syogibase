@@ -1,9 +1,9 @@
-package com.example.syogibase.DI
+package com.example.syogibase.di
 
 import android.app.Application
-import com.example.syogibase.Contact.GameViewContact
-import com.example.syogibase.Model.BoardRepository
-import com.example.syogibase.Presenter.GameLogicPresenter
+import com.example.syogibase.contact.GameViewContact
+import com.example.syogibase.model.BoardRepository
+import com.example.syogibase.presenter.GameLogicPresenter
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module

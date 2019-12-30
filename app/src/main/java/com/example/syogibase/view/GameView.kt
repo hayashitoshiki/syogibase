@@ -1,11 +1,11 @@
-package com.example.syogibase.View
+package com.example.syogibase.view
 
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
-import com.example.syogibase.Contact.GameViewContact
+import com.example.syogibase.contact.GameViewContact
 import com.example.syogibase.R
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -19,8 +19,16 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     private lateinit var canvas:Canvas
     private val paint:Paint = Paint()
 
-    private val bw:Float = width.toFloat()//将棋盤の幅
-    private val bh:Float = width.toFloat()//将棋盤の高さ
+    private val bw:Float = if(width < height){
+        width.toFloat()
+    }else{
+        height.toFloat()
+    }//将棋盤の幅
+    private val bh:Float =  if(width < height){
+        width.toFloat()
+    }else{
+        height.toFloat()
+    }//将棋盤の高さ
     private val cw:Float = bw/9//１マスの幅
     private val ch:Float = bh/9//１マスの高さ
 
@@ -54,7 +62,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
         //盤面セット
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.free_grain_sub)
         val rect1 = Rect(0, ch.toInt(), bw.toInt(), bh.toInt() + cw.toInt())
-        val rect2 = Rect(0, ch.toInt(), bw.toInt(), bh.toInt() + cw.toInt())
+        val rect2 = Rect(0, ch.toInt(), bw.toInt() + bw.toInt(), bh.toInt() + cw.toInt())
         canvas.drawBitmap(bmp, rect1, rect2, paint)
         //駒台セット
         paint.color = Color.rgb(251, 171, 83)
@@ -81,6 +89,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
         paint.textSize = cw/2
         canvas.drawText(name, (cw*i)+cw/5, ch*2+(ch*j)-cw/4, paint)
     }
+
     //先手の持ち駒描画
     override fun drawHoldPirceBlack(nameJP:String,stock:Int, count:Int){
         paint.textSize = cw / 2
@@ -112,11 +121,11 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     override fun showDialog(){
         val alertBuilder = AlertDialog.Builder(context).setCancelable(false)
         alertBuilder.setMessage("成りますか？")
-        alertBuilder.setPositiveButton("はい") { dialog, which ->
+        alertBuilder.setPositiveButton("はい") { _, _ ->
             presenter.evolutionPiece(true)
             invalidate()
         }
-        alertBuilder.setNegativeButton("いいえ") { dialog, which ->
+        alertBuilder.setNegativeButton("いいえ") { _, _ ->
             presenter.evolutionPiece(false)
             invalidate()
         }
