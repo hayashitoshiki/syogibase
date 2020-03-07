@@ -190,42 +190,4 @@ class BoardRepository {
         for(i in 0..8) for(j in 0..8)if(board.cells[i][j].piece == OU && board.cells[i][j].turn == turn)return Pair(i, j)
         return  Pair(0, 0)
     }
-
-    //駒の動きを返す
-
-    //上
-    fun findUpMovePiece(x:Int, y:Int):Boolean{
-        val upList:Array<Piece> = arrayOf(FU,TO,KYO,N_KYO,GIN,N_GIN,KIN,OU,GYOKU,HISYA,RYU,UMA)
-
-        if (upList.contains(board.cells[x][y].piece))return true
-        return false
-    }
-    //下
-    fun findDownMovePiece(x:Int, y:Int):Boolean{
-        val upList:Array<Piece> = arrayOf(TO,N_KYO,N_KEI,N_GIN,KIN,OU,GYOKU,HISYA,RYU,UMA)
-
-        if (upList.contains(board.cells[x][y].piece))return true
-        return false
-    }
-    //横
-    fun findLRMovePiece(x:Int, y:Int):Boolean{
-        val lrList:Array<Piece> = arrayOf(TO,N_KYO,N_KEI,N_GIN,KIN,OU,GYOKU,HISYA,RYU,UMA)
-
-        if (lrList.contains(board.cells[x][y].piece))return true
-        return false
-    }
-    //斜め上
-    fun findDiagonalUp(x:Int, y:Int):Boolean{
-        val pieceList:Array<Piece> = arrayOf(TO,N_KYO,N_KEI,N_GIN,GIN,KIN,OU,GYOKU,KAKU,RYU,UMA)
-
-        if (pieceList.contains(board.cells[x][y].piece))return true
-        return false
-    }
-    //斜め下
-    fun findDiagonalDown(x:Int, y:Int):Boolean{
-        val pieceList:Array<Piece> = arrayOf(GIN,OU,GYOKU,KAKU,RYU,UMA)
-
-        if (pieceList.contains(board.cells[x][y].piece))return true
-        return false
-    }
 }

@@ -28,6 +28,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
             //ヒント表示がされているマスををタップした場合動かす
             if(boardRepository.getHint(x,y-1)){
                 setMove(x,y-1)
+                evolutionCheck(x,y-1)
                 val turnOpponent = if(turn==BLACK) WHITE else BLACK
                 val (kingX: Int, kingY: Int) = boardRepository.findKing(turnOpponent)
 
@@ -59,11 +60,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
                     else              Pair(touchX-move.x, touchY-move.y)
                 //駒を動かしたとき自分の王様が王手にならなかったらヒントを表示
                if(newX in 0..8 && newY in 0..8 && boardRepository.getTurn(newX,newY) != turn) {
-                   boardRepository.setPre(touchX, touchY)
-                   boardRepository.setMove(newX, newY, turn)
-                   val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
-                   if (!checkJudg(kingX, kingY, turn)) boardRepository.setHint(newX, newY)
-                   boardRepository.setBackMove()
+                   setHint(touchX, touchY,newX, newY,turn)
                }
                 if(newX in 0..8 && newY in 0..8 && boardRepository.getTurn(newX,newY) != 0)break
             }
@@ -75,13 +72,25 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
     private fun setMove(x:Int, y:Int){
         boardRepository.setMove(x, y, turn)
         boardRepository.setHoldPiece()
-        //成り判定
-        val preY = boardRepository.findLogY()
-        if((preY in 0..8 && boardRepository.findEvolutionBy(x,y))&&
-            ((turn == BLACK && (y<= 2 || preY<=2)) ||
-             (turn == WHITE && (6<=y  || 6<=preY)))) evolutionCheck()
-
         boardRepository.resetHint()
+    }
+
+    //成り判定
+    private fun evolutionCheck(x:Int, y:Int){
+        val preY = boardRepository.findLogY()
+        if ((preY in 0..8 && boardRepository.findEvolutionBy(x, y)) && ((turn == BLACK && (y <= 2 || preY <= 2)) || (turn == WHITE && (6 <= y || 6 <= preY)))){
+            if(boardRepository.checkForcedevolution())evolutionPiece(true)
+            else view.showDialog()
+        }
+    }
+
+    //ヒントを設定する
+    private fun setHint(x:Int, y:Int, newX:Int, newY:Int, turn:Int) {
+        boardRepository.setPre(x, y)
+        boardRepository.setMove(newX, newY, turn)
+        val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
+        if (!checkJudg(kingX, kingY, turn)) boardRepository.setHint(newX, newY)
+        boardRepository.setBackMove()
     }
 
     //キャンセル
@@ -94,12 +103,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↑
         for(j in 1..8){
             if(0<= r-j){
-                if(j == 1 && boardRepository.getTurn(c,r-j) != turnKing &&
-                    ((boardRepository.findUpMovePiece(c,r-j) && turnKing == BLACK)||
-                    (boardRepository.findDownMovePiece(c,r-j) && turnKing == WHITE))) return true
-                else if(((boardRepository.getPiece(c,r-j) == HISYA || boardRepository.getPiece(c,r-j) == RYU) && boardRepository.getTurn(c,r-j) != turnKing) ||
-                    (boardRepository.getPiece(c,r-j) == KYO && boardRepository.getTurn(c,r-j) == WHITE && turnKing == BLACK) ) return true
-                else if(boardRepository.getTurn(c,r-j) != 0) break
+                val cellTurn = boardRepository.getTurn(c, r-j)
+                val cellPiece = boardRepository.getPiece(c, r-j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalUpMovePiece() && turnKing == BLACK) || (cellPiece.equalDownMovePiece() && turnKing == WHITE))) return true
+                else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -108,12 +117,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↓
         for(j in 1..8){
             if(r+j<9){
-                if(j == 1 && boardRepository.getTurn(c,r+j) != turnKing &&
-                    ((boardRepository.findDownMovePiece(c,r+j) && turnKing == BLACK)||
-                     (boardRepository.findUpMovePiece(c,r+j) && turnKing == WHITE))) return true
-                else if(((boardRepository.getPiece(c,r+j) == HISYA || boardRepository.getPiece(c,r+j) == RYU) && boardRepository.getTurn(c,r+j) != turnKing) ||
-                    (boardRepository.getPiece(c,r+j) == KYO && boardRepository.getTurn(c,r+j) == BLACK && turnKing == WHITE))return true
-                else if(boardRepository.getTurn(c,r+j) != 0) break
+                val cellTurn = boardRepository.getTurn(c, r+j)
+                val cellPiece = boardRepository.getPiece(c, r+j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalDownMovePiece() && turnKing == BLACK) || (cellPiece.equalUpMovePiece() && turnKing == WHITE))) return true
+                else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -122,10 +131,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //←
         for(j in 1..8){
             if(0<=c-j){
-                if(j == 1 && boardRepository.getTurn(c-j,r) != turnKing &&
-                    boardRepository.findLRMovePiece(c-j,r)) return true
-                else if((boardRepository.getPiece(c-j,r) == HISYA || boardRepository.getPiece(c-j,r) == RYU) && boardRepository.getTurn(c-j,r) != turnKing) return true
-                else if(boardRepository.getTurn(c-j,r) != 0) break
+                val cellTurn = boardRepository.getTurn(c-j, r)
+                val cellPiece = boardRepository.getPiece(c -j, r)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && cellPiece.equalLRMovePiece()) return true
+                else if (cellPiece.equalLongLRMovePiece()) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -134,11 +145,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //→
         for(j in 1..8){
             if(c+j < 9){
-                if(boardRepository.getTurn(c+j,r) == turnKing) break
-                else if(j == 1 && boardRepository.getTurn(c+j,r) != turnKing &&
-                    boardRepository.findLRMovePiece(c+j,r)) return true
-                else if((boardRepository.getPiece(c+j,r) == HISYA || boardRepository.getPiece(c+j,r) == RYU) && boardRepository.getTurn(c+j,r) != turnKing) return true
-                else if(boardRepository.getTurn(c+j,r) != 0) break
+                val cellTurn = boardRepository.getTurn(c + j, r)
+                val cellPiece = boardRepository.getPiece(c + j, r)
+                if (cellTurn == turnKing) break
+                else if (cellPiece.equalLRMovePiece() && j == 1) return true
+                else if (cellPiece.equalLongLRMovePiece()) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -147,12 +159,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↖
         for(j in 1..8){
             if(0<=c-j && 0<=r-j){
-                if(boardRepository.getTurn(c-j,r-j) == turnKing) break
-                else if(j == 1 && boardRepository.getTurn(c-j,r-j) != turnKing &&
-                    ((boardRepository.findDiagonalUp(c-j,r-j) && turnKing == BLACK)||
-                    (boardRepository.findDiagonalDown(c-j,r-j) && turnKing == WHITE))) return true
-                else if((boardRepository.getPiece(c-j,r-j) == KAKU || boardRepository.getPiece(c-j,r-j) == UMA) && boardRepository.getTurn(c-j,r-j) != turnKing) return true
-                else if(boardRepository.getTurn(c-j,r-j) != 0) break
+                val cellTurn = boardRepository.getTurn(c-j, r-j)
+                val cellPiece = boardRepository.getPiece(c -j, r-j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
+                else if (cellPiece == KAKU || cellPiece == UMA) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -161,11 +173,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↙
         for(j in 1..8){
             if(0<=c-j && r+j<9){
-                if(j == 1 && boardRepository.getTurn(c-j,r+j) != turnKing &&
-                    ((boardRepository.findDiagonalDown(c-j,r+j) && turnKing == BLACK)||
-                    (boardRepository.findDiagonalUp(c-j,r+j) && turnKing == WHITE))) return true
-                else if((boardRepository.getPiece(c-j,r+j) == KAKU || boardRepository.getPiece(c-j,r+j) == UMA)  && boardRepository.getTurn(c-j,r+j) != turnKing) return true
-                else if(boardRepository.getTurn(c-j,r+j) != 0) break
+                val cellTurn = boardRepository.getTurn(c-j, r+j)
+                val cellPiece = boardRepository.getPiece(c -j, r+j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
+                else if (cellPiece == KAKU || cellPiece == UMA) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -174,11 +187,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↗
         for(j in 1..8){
             if(c+j<9 && 0<=r-j){
-                if(j == 1 && boardRepository.getTurn(c+j,r-j) != turnKing &&
-                    ((boardRepository.findDiagonalUp(c+j,r-j) && turnKing == BLACK)||
-                     (boardRepository.findDiagonalDown(c+j,r-j) && turnKing == WHITE))) return true
-                else if((boardRepository.getPiece(c+j,r-j) == KAKU || boardRepository.getPiece(c+j,r-j) == UMA) && boardRepository.getTurn(c+j,r-j) != turnKing) return true
-                else if(boardRepository.getTurn(c+j,r-j) != 0) break
+                val cellTurn = boardRepository.getTurn(c+j, r-j)
+                val cellPiece = boardRepository.getPiece(c+j, r-j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
+                else if (cellPiece == KAKU || cellPiece == UMA) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -187,11 +201,12 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         //↘
         for(j in 1..8){
             if(c+j<9 && r+j<9){
-                if(j == 1 && boardRepository.getTurn(c+j,r+j) != turnKing &&
-                    ((boardRepository.findDiagonalDown(c+j,r+j) && turnKing == BLACK)||
-                     (boardRepository.findDiagonalUp(c+j,r+j) && turnKing == WHITE))) return true
-                else if((boardRepository.getPiece(c+j,r+j) == KAKU || boardRepository.getPiece(c+j,r+j) == UMA) && boardRepository.getTurn(c+j,r+j) != turnKing) return true
-                else if(boardRepository.getTurn(c+j,r+j) != 0) break
+                val cellTurn = boardRepository.getTurn(c+j, r+j)
+                val cellPiece = boardRepository.getPiece(c+j, r+j)
+                if (cellTurn == turnKing) break
+                else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
+                else if (cellPiece == KAKU || cellPiece == UMA) return true
+                else if (cellTurn != 0) break
             }else{
                 //盤外
                 break
@@ -251,12 +266,6 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
         return false
     }
 
-    //成り判定
-     private fun evolutionCheck(){
-        if(boardRepository.checkForcedevolution())evolutionPiece(true)
-        else view.showDialog()
-    }
-
     //成り
     override fun evolutionPiece(bool:Boolean){
         if(bool) boardRepository.setEvolution()
@@ -278,11 +287,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
                 for(i in 0..8){
                     for(j in 0..8){
                         if(boardRepository.getTurn(i,j) == 0) {
-                            boardRepository.setPre(newX, newY)
-                            boardRepository.setMove(i,j,turn)
-                            val(kingX:Int,kingY:Int) = boardRepository.findKing(turn)
-                            if(!checkJudg(kingX, kingY,turn)) boardRepository.setHint(i, j)
-                            boardRepository.setBackMove()
+                            setHint(newX, newY, i,j, turn)
                         }
                     }
                 }
@@ -291,11 +296,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
                     for(j in 1..8){
                         val J = if(turn ==BLACK) j else 8-j
                         if(boardRepository.getTurn(i,J) == 0) {
-                            boardRepository.setPre(newX, newY)
-                            boardRepository.setMove(i, J, turn)
-                            val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
-                            if (!checkJudg(kingX, kingY, turn)) boardRepository.setHint(i, J)
-                            boardRepository.setBackMove()
+                            setHint(newX, newY, i,J, turn)
                         }
                     }
                 }
@@ -304,11 +305,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
                     for(j in 2..8){
                         val J = if(turn == BLACK) j else 8-j
                         if(boardRepository.getTurn(i,J) == 0) {
-                            boardRepository.setPre(newX, newY)
-                            boardRepository.setMove(i, J, turn)
-                            val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
-                            if (!checkJudg(kingX, kingY, turn)) boardRepository.setHint(i, J)
-                            boardRepository.setBackMove()
+                            setHint(newX, newY, i,J, turn)
                         }
                     }
                 }
@@ -320,11 +317,7 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val boar
                             for(k in 1..8){
                                 val K = if(y == 10) k else k-1
                                 if(boardRepository.getTurn(i,K) == 0){
-                                    boardRepository.setPre(newX, newY)
-                                    boardRepository.setMove(i,K,turn)
-                                    val(kingX:Int,kingY:Int) = boardRepository.findKing(turn)
-                                    if(!checkJudg(kingX, kingY,turn)) boardRepository.setHint(i, K)
-                                    boardRepository.setBackMove()
+                                    setHint(newX, newY, i,K, turn)
                                 }
                             }
                         }
