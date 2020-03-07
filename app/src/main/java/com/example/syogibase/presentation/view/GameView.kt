@@ -1,11 +1,11 @@
-package com.example.syogibase.view
+package com.example.syogibase.presentation.view
 
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
 import android.view.MotionEvent
 import android.view.View
-import com.example.syogibase.contact.GameViewContact
+import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.R
 import org.koin.core.KoinComponent
 import org.koin.core.inject

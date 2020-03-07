@@ -1,4 +1,4 @@
-package com.example.syogibase.view
+package com.example.syogibase.presentation.view
 
 import android.content.Context
 import android.graphics.Canvas

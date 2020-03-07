@@ -1,4 +1,4 @@
-package com.example.syogibase.model.data
+package com.example.syogibase.data.data
 
 //１局の対局ログ格納クラス
 
