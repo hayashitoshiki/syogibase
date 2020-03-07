@@ -5,16 +5,16 @@
 大学卒業時に作った将棋アプリを見返してみるとひどすぎたため、
 アーキテクチャ設計の勉強がてら拡張元となる普通の将棋の作成
 
-#### 言語
+### 言語
 Kotlin
 
-#### アーキテクチャ
+### アーキテクチャ
 MVP
 
-#### 仕様ライブラリ
+### 仕様ライブラリ
 Koin
 
-#### 将棋に関連する各クラスの詳細  
+### 将棋に関連する各クラスの詳細  
 
 *	View  
       * GameView・・・画面表示  
@@ -29,3 +29,15 @@ Koin
       * Piece・・・駒の情報  
       * GameLog・・・一局のログデータ  
 
+### 使い方
+将棋盤を表示したい画面でGameActivity()を呼ぶ
+　　※またはGameViewを任意のActivity/Fragmentで呼ぶ
+  
+###  イメージ
+####  対局画面
+<img src="https://github.com/teaTreeTree/syogibase/blob/master/capture/gameStart_capture.png" width="400">  
+
+####  終了画面  
+
+<img src="https://github.com/teaTreeTree/syogibase/blob/master/capture/gameEnd_capture.png" width="400">  
+  
