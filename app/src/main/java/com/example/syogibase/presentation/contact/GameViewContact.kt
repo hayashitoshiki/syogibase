@@ -1,4 +1,4 @@
-package com.example.syogibase.contact
+package com.example.syogibase.presentation.contact
 
 interface GameViewContact {
 
@@ -11,14 +11,14 @@ interface GameViewContact {
         fun drawWhitePiece(name:String, i:Int, j:Int)
         //ヒント描画
         fun drawHint(x:Int,y:Int)
+        //先手の持ち駒描画
+        fun drawHoldPieceBlack(nameJP:String, stock:Int, count:Int)
+        //後手の持ち駒描画
+        fun drawHoldPieceWhite(nameJP:String, stock:Int, count:Int)
         //成るか判断するダイアログ生成
         fun showDialog()
-        //先手の持ち駒セット
-        fun drawHoldPirceBlack(nameJP:String, stock:Int, count:Int)
-        //後手の持ち駒セット
-        fun drawHoldPirceWhite(nameJP:String, stock:Int, count:Int)
-        //詰んだことをActivityに知らせる
-        fun gameEnd()
+        //対局終了モーダル生成
+        fun gameEnd(turn:Int)
     }
 
     interface Presenter{

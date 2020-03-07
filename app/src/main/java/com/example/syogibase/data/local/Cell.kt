@@ -1,4 +1,4 @@
-package com.example.syogibase.model.data
+package com.example.syogibase.data.local
 
 //１マスの情報クラス
 
