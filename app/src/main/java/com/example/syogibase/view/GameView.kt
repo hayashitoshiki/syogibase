@@ -31,18 +31,20 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     }//将棋盤の高さ
     private val cw:Float = bw/9//１マスの幅
     private val ch:Float = bh/9//１マスの高さ
+    private val median = 2 //盤の位置　中央値：３ 範囲：０～６
 
     //onCreat
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         this.canvas = canvas
+        canvas.translate(0f, cw * median)
         presenter.drawView()
     }
 
     //指した時の動作
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val c = (event.x / cw).toInt()
-        val r = (event.y / ch).toInt()
+        val r = (event.y / ch - median).toInt()
 
         when (event.action) {
             MotionEvent.ACTION_DOWN ->{}

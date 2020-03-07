@@ -35,7 +35,7 @@ class GameActivity : AppCompatActivity() {
         val inflater = getLayoutInflater()
         val viewGroup = this.findViewById(R.id.constraint_layout) as ConstraintLayout
         val view3: View
-        view3 = WinLoseModal(this, 1)
+        view3 = WinLoseModal(this, 1,frame!!.width.toFloat(),frame!!.height.toFloat())
 
         frame!!.addView(view3, 1)
         val view2 = inflater.inflate(R.layout.modal_game_end, viewGroup)

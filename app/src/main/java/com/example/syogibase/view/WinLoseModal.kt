@@ -8,7 +8,8 @@ import android.view.MotionEvent
 import android.view.View
 
 //勝った時の勝敗表示View
-class WinLoseModal(context: Context, private val turn: Int) : View(context) {
+class WinLoseModal(context: Context, private val turn: Int,private val w:Float, private val h:Float) : View(context) {
+
     private var mas: Float = 0.toFloat()//ひとまず分の大きさメモ
 
     init {
@@ -16,7 +17,7 @@ class WinLoseModal(context: Context, private val turn: Int) : View(context) {
     }
 
     override fun onDraw(canvas: Canvas) {
-        mas = (width / 9).toFloat()
+        mas = (w / 9)
         super.onDraw(canvas)
         val paint = Paint()
         paint.textSize = mas * 3
@@ -28,28 +29,28 @@ class WinLoseModal(context: Context, private val turn: Int) : View(context) {
             var text_Width = paint.measureText("Win")
             paint.textSkewX = -0.25f
             paint.color = Color.rgb(255, 0, 0)
-            canvas.rotate(180f, (width / 2).toFloat(), mas * 2)
-            canvas.drawText("Win", width / 2 - text_Width / 2, mas * 2, paint)
+            canvas.rotate(180f, (w / 2), mas * 4)
+            canvas.drawText("Win", w / 2 - text_Width / 2, h / 2 - mas * 4, paint)
             canvas.restore()
 
             text_Width = paint.measureText("Lose")
             paint.textSkewX = -0.25f
             paint.color = Color.rgb(0, 0, 255)
-            canvas.drawText("Lose", width / 2 - text_Width / 2, mas * 15, paint)
+            canvas.drawText("Lose", w / 2 - text_Width / 2, h / 2 + mas * 4, paint)
         } else {
             canvas.save()
 
             var text_Width = paint.measureText("Lose")
             paint.textSkewX = -0.25f
             paint.color = Color.rgb(0, 0, 255)
-            canvas.rotate(180f, (width / 2).toFloat(), mas * 2)
-            canvas.drawText("Lose", width / 2 - text_Width / 2, mas * 2, paint)
+            canvas.rotate(180f, (w / 2), h / 2 - mas * 4)
+            canvas.drawText("Lose", w / 2 - text_Width / 2, h / 2 - mas * 4, paint)
             canvas.restore()
 
             text_Width = paint.measureText("Win")
             paint.textSkewX = -0.25f
             paint.color = Color.rgb(255, 0, 0)
-            canvas.drawText("Win", width / 2 - text_Width / 2, mas * 15, paint)
+            canvas.drawText("Win", w / 2 - text_Width / 2, h / 2 + mas * 4 , paint)
         }
     }
 
