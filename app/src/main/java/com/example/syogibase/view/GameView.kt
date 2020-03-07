@@ -72,7 +72,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
         paint.color = Color.rgb(40, 40, 40)
         paint.strokeWidth = 2f
         for (i in 0 until 9) canvas.drawLine(cw * (i + 1).toFloat(), cw, cw * (i + 1).toFloat(), bh + cw, paint)
-        for (i in 0 until 9) canvas.drawLine(0f, ch * (i + 1), bw, ch * (i + 1), paint)
+        for (i in 0 until 10) canvas.drawLine(0f, ch * (i + 1), bw, ch * (i + 1), paint)
     }
 
     //後手の駒描画
