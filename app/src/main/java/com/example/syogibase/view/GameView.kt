@@ -61,7 +61,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     override fun drawBoard(){
         //盤面セット
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.free_grain_sub)
-        val rect1 = Rect(0, ch.toInt(), bw.toInt(), bh.toInt() + cw.toInt())
+        val rect1 = Rect(0, 0, bw.toInt(), bh.toInt())
         val rect2 = Rect(0, ch.toInt(), bw.toInt() + bw.toInt(), bh.toInt() + cw.toInt())
         canvas.drawBitmap(bmp, rect1, rect2, paint)
         //駒台セット
