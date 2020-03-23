@@ -1,16 +1,18 @@
 package com.example.syogibase.domain
 
 import android.util.Log
-import com.example.syogibase.data.BoardRepositoryImp
+import com.example.syogibase.data.BoardRepository
 import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.data.local.PieceMove
 import com.example.syogibase.util.*
 
-class SyogiLogicUseCaseImp(private val boardRepository: BoardRepositoryImp):SyogiLogicUseCase {
+class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLogicUseCase {
 
     private var turn: Int = BLACK
+
+    private var positionList = mutableMapOf<String, Int>()
 
     //駒を動かした後～王手判定
     override fun checkGameEnd(): Boolean {
@@ -63,6 +65,18 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepositoryImp):Syog
         boardRepository.setMove(x, y, turn,evolution)
         boardRepository.setHoldPiece()
         boardRepository.resetHint()
+        val board = boardRepository.getBoard()
+        var position: String = ""
+        board.forEach {
+            it.forEach {
+                position += it.hint.toString() + it.piece.toString() + it.turn.toString()
+            }
+        }
+        if (positionList.containsKey(position)) {
+            positionList[position] = positionList[position]!!.toInt() + 1
+        } else {
+            positionList[position] = 1
+        }
     }
 
     //成り判定
@@ -342,5 +356,13 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepositoryImp):Syog
     //動かす駒の元の位置をセットする
     override fun setPre(x:Int, y:Int){
         boardRepository.setPre(x, y)
+    }
+
+    // 千日手判定
+    override fun isRepetitionMove(): Boolean {
+        positionList.forEach { (_, v) ->
+            if (v >= 4)return true
+        }
+        return false
     }
 }

@@ -133,7 +133,7 @@ class BoardRepositoryImp :BoardRepository{
     }
 
     //取った駒を表示
-    override fun getTakePice(): Piece {
+    override fun getTakePiece(): Piece {
         return logList.last().beforpiece
     }
 
@@ -207,22 +207,27 @@ class BoardRepositoryImp :BoardRepository{
         board.cells.forEach { it.forEach { it.hint = false } }
     }
 
-    //そのマスの駒の所有者を返す
+    // 局面を取得
+    override fun getBoard(): Array<Array<Cell>> {
+        return board.cells
+    }
+
+    //指定のマスの駒の所有者を返す
     override fun getTurn(x: Int, y: Int): Int {
         return board.cells[x][y].turn
     }
 
-    //そのマスのヒントを返す
+    //指定したマスのヒントを返す
     override fun getHint(x: Int, y: Int): Boolean {
         return board.cells[x][y].hint
     }
 
-    //そのマスの駒を返す
+    //指定したマスの駒を返す
     override fun getPiece(x: Int, y: Int): Piece {
         return board.cells[x][y].piece
     }
 
-    //そのマスの駒の名前を返す
+    //指定したマスの駒の名前を返す
     override fun getJPName(x: Int, y: Int): String {
         return board.cells[x][y].piece.nameJP
     }
