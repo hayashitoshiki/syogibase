@@ -53,10 +53,10 @@ class BoardRepositoryImp :BoardRepository{
     //１手戻す
     override fun setBackMove() {
         val log: GameLog = logList.last()
-        when(log.oldY){
+        when (log.oldY) {
             10 -> board.holdPieceBlack[changeIntToPiece(log.oldX)] = board.holdPieceBlack[changeIntToPiece(log.oldX)]!! + 1
             -1 -> board.holdPieceWhite[changeIntToPiece(log.oldX)] = board.holdPieceWhite[changeIntToPiece(log.oldX)]!! + 1
-            else ->{
+            else -> {
                 board.cells[log.oldX][log.oldY].piece = log.afterPiece
                 board.cells[log.oldX][log.oldY].turn = log.afterTurn
             }
