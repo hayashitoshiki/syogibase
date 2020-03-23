@@ -365,4 +365,18 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLo
         }
         return false
     }
+
+    // トライルール判定
+    override fun isTryKing(): Boolean {
+        val cell =
+            if (turn == BLACK) {
+                boardRepository.getCellInformation(4,0)
+            } else {
+                boardRepository.getCellInformation(4,8)
+            }
+        if ((cell.piece == GYOKU || cell.piece == OU) && cell.turn == turn) {
+            return true
+        }
+        return false
+    }
 }
