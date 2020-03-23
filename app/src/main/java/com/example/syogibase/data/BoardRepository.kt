@@ -31,7 +31,7 @@ interface BoardRepository {
     //持ち駒マスから取得
     fun findHoldPieceBy(i:Int, turn:Int):Piece
     //取った駒を表示
-    fun getTakePice():Piece
+    fun getTakePiece():Piece
     //持ち駒追加
     fun setHoldPiece()
     //強制的にならないといけない駒かチェック
@@ -42,16 +42,18 @@ interface BoardRepository {
     fun setHint(x:Int, y:Int)
     //ヒントリセット
     fun resetHint()
-    //そのマスの駒の所有者を返す
+    //局面を取得
+    fun getBoard(): Array<Array<Cell>>
+    //指定したマスの駒の所有者を返す
     fun getTurn(x:Int, y:Int):Int
-    //そのマスのヒントを返す
+    //指定したマスのヒントを返す
     fun getHint(x:Int, y:Int):Boolean
-    //そのマスの駒を返す
+    //指定したマスの駒を返す
     fun getPiece(x:Int, y:Int): Piece
-    //そのマスの駒の名前を返す
+    //指定したマスの駒の名前を返す
     fun getJPName(x:Int, y:Int):String
-    //指定した手番の王様の座標を返す
-    fun findKing(turn:Int):Pair<Int, Int>
     //指定したマスの情報を返す
     fun getCellInformation(x:Int, y:Int): Cell
+    //指定した手番の王様の座標を返す
+    fun findKing(turn:Int):Pair<Int, Int>
 }

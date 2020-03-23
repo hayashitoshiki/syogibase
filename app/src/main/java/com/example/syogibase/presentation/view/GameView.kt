@@ -93,7 +93,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     }
 
     //先手の持ち駒描画
-    override fun drawHoldPirceBlack(nameJP:String,stock:Int, count:Int){
+    override fun drawHoldPieceBlack(nameJP:String,stock:Int, count:Int){
         paint.textSize = cw / 2
         canvas.drawText(nameJP, (cw*(count+2))+cw/5, ch*2+(ch*9)-cw/4, paint)
         paint.textSize = cw / 5
@@ -101,7 +101,7 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     }
 
     //後手の持ち駒描画
-    override fun drawHoldPirceWhite(nameJP:String, stock:Int, count:Int){
+    override fun drawHoldPieceWhite(nameJP:String, stock:Int, count:Int){
         canvas.save()
         canvas.rotate(180f, cw*(7-count), ch-cw/2)
         paint.textSize = cw / 2
@@ -135,8 +135,8 @@ class GameView(private val activity:GameActivity, context: Context, width:Int, h
     }
 
     //終了ダイアログ表示
-    override fun gameEnd(){
-        activity.gameEnd()
+    override fun gameEnd(turn:Int){
+        activity.gameEnd(turn)
     }
 
 }

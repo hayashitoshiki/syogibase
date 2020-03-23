@@ -43,9 +43,10 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val useC
                     if(useCase.evolutionCheck(x,y-1) && !useCase.compulsionEvolutionCheck()){
                         view.showDialog()
                     }
-                    if(useCase.checkGameEnd()){
-                        view.gameEnd(useCase.getTurn())
-                    }
+                    // 千日手判定
+                    if (useCase.isRepetitionMove()) view.gameEnd(3)
+                    if (useCase.checkGameEnd()) view.gameEnd(useCase.getTurn())
+
                 }
                 useCase.getTurn() -> useCase.setTouchHint(x, y-1)
                 else ->useCase.cancel()
