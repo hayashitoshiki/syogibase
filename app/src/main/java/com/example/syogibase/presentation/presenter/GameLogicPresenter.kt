@@ -45,8 +45,10 @@ class GameLogicPresenter(private val view: GameViewContact.View,private val useC
                     }
                     // 千日手判定
                     if (useCase.isRepetitionMove()) view.gameEnd(3)
+                    // トライルール判定
+                    if (useCase.isTryKing()) view.gameEnd(useCase.getTurn())
+                    // 王手判定
                     if (useCase.checkGameEnd()) view.gameEnd(useCase.getTurn())
-
                 }
                 useCase.getTurn() -> useCase.setTouchHint(x, y-1)
                 else ->useCase.cancel()

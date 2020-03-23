@@ -39,4 +39,6 @@ interface SyogiLogicUseCase {
     fun setPre(x:Int, y:Int)
     // 千日手判定
     fun isRepetitionMove(): Boolean
+    // トライルール判定
+    fun isTryKing(): Boolean
 }
