@@ -2,74 +2,48 @@ package com.example.syogibase.domain
 
 import android.util.Log
 import com.example.syogibase.data.BoardRepository
-import com.example.syogibase.data.local.GameLog
+import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.data.local.PieceMove
-import com.example.syogibase.util.*
+import com.example.syogibase.util.BLACK
+import com.example.syogibase.util.WHITE
 
-class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLogicUseCase {
+class SyogiLogicUseCaseImp(
+    private val boardRepository: BoardRepository
+) : SyogiLogicUseCase {
 
     private var turn: Int = BLACK
 
     private var positionList = mutableMapOf<String, Int>()
 
-    //駒を動かした後～王手判定
-    override fun checkGameEnd(): Boolean {
-        val turnOpponent = if (turn == BLACK) WHITE else BLACK
-        val (kingX: Int, kingY: Int) = boardRepository.findKing(turnOpponent)
+    // region アクション
 
-        //もし王手&詰み判定
-        if (checkJudg(kingX, kingY, turnOpponent) && checkmate()) {
-            return true
-        }
-        turn = if (turn == BLACK) WHITE else BLACK
-        return false
+    // 現在の手番を返す
+    override fun getTurn(): Int {
+        return turn
     }
 
-    //指定したマスのヒント探す
+    // 駒落ち設定
+    override fun setHandicap(turn: Int, handicap: Int) {
+        boardRepository.setHandicap(turn, handicap)
+    }
+
+    // 指定したマスのヒント探す
     override fun setTouchHint(x: Int, y: Int) {
         boardRepository.resetHint()
         searchHint(x, y, turn)
     }
 
-    //ヒント取得
-    private fun searchHint(touchX: Int, touchY: Int, turn: Int) {
-        val moveList: Array<Array<PieceMove>> = boardRepository.getMove(touchX, touchY)
-
-        for (moveDirection in moveList) {
-            for (move in moveDirection) {
-                val (newX: Int, newY: Int) =
-                    if (turn == BLACK) Pair(touchX + move.x, touchY + move.y)
-                    else Pair(touchX - move.x, touchY - move.y)
-                //動かした先が盤上で自分の駒以外だったらヒントチェック
-                if (newX in 0..8 && newY in 0..8 && boardRepository.getTurn(newX, newY) != turn) {
-                    setHint(touchX, touchY, newX, newY, turn)
-                }
-                if (newX in 0..8 && newY in 0..8 && boardRepository.getTurn(newX, newY) != 0) break
-            }
-        }
-    }
-
-    //ヒントを設定する
-    override fun setHint(x:Int, y:Int, newX:Int, newY:Int, turn:Int) {
-        boardRepository.setPre(x, y)
-        boardRepository.setMove(newX, newY, turn,false)
-        val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
-        if (!checkJudg(kingX, kingY, turn)) boardRepository.setHint(newX, newY)
-        boardRepository.setBackMove()
-    }
-
-    //駒を動かす
-    override fun setMove(x: Int, y: Int,evolution:Boolean) {
-        boardRepository.setMove(x, y, turn,evolution)
+    // 駒を動かす
+    override fun setMove(x: Int, y: Int, evolution: Boolean) {
+        var position = ""
+        boardRepository.setMove(x, y, turn, evolution)
         boardRepository.setHoldPiece()
         boardRepository.resetHint()
-        val board = boardRepository.getBoard()
-        var position: String = ""
-        board.forEach {
-            it.forEach {
-                position += it.hint.toString() + it.piece.toString() + it.turn.toString()
+        boardRepository.getBoard().forEach {
+            it.forEach { cell ->
+                position += cell.hint.toString() + cell.piece.toString() + cell.turn.toString()
             }
         }
         if (positionList.containsKey(position)) {
@@ -79,190 +53,16 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLo
         }
     }
 
-    //成り判定
-    override  fun evolutionCheck(x:Int, y:Int):Boolean{
-        val preY = boardRepository.findLogY()
-        if ((preY in 0..8 && boardRepository.findEvolutionBy(x, y)) && ((turn == BLACK && (y <= 2 || preY <= 2)) || (turn == WHITE && (6 <= y || 6 <= preY)))){
-            return true
-        }
-        return false
-    }
-
-    //キャンセル
-    override fun cancel() {
-        boardRepository.resetHint()
-    }
-
-    //王手判定
-    private fun checkJudg(c: Int, r: Int, turnKing: Int): Boolean {
-        //↑
-        for (j in 1..8) {
-            if (0 <= r - j) {
-                val cellTurn = boardRepository.getTurn(c, r-j)
-                val cellPiece = boardRepository.getPiece(c, r-j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalUpMovePiece() && turnKing == BLACK) || (cellPiece.equalDownMovePiece() && turnKing == WHITE))) return true
-                else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //↓
-        for (j in 1..8) {
-            if (r + j < 9) {
-                val cellTurn = boardRepository.getTurn(c, r+j)
-                val cellPiece = boardRepository.getPiece(c, r+j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalDownMovePiece() && turnKing == BLACK) || (cellPiece.equalUpMovePiece() && turnKing == WHITE))) return true
-                else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //←
-        for (j in 1..8) {
-            if (0 <= c - j) {
-                val cellTurn = boardRepository.getTurn(c-j, r)
-                val cellPiece = boardRepository.getPiece(c -j, r)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && cellPiece.equalLRMovePiece()) return true
-                else if (cellPiece.equalLongLRMovePiece()) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //→
-        for (j in 1..8) {
-            if (c + j < 9) {
-                val cellTurn = boardRepository.getTurn(c + j, r)
-                val cellPiece = boardRepository.getPiece(c + j, r)
-                if (cellTurn == turnKing) break
-                else if (cellPiece.equalLRMovePiece() && j == 1) return true
-                else if (cellPiece.equalLongLRMovePiece()) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //↖
-        for (j in 1..8) {
-            if (0 <= c - j && 0 <= r - j) {
-                val cellTurn = boardRepository.getTurn(c-j, r-j)
-                val cellPiece = boardRepository.getPiece(c -j, r-j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
-                else if (cellPiece == KAKU || cellPiece == UMA) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //↙
-        for (j in 1..8) {
-            if (0 <= c - j && r + j < 9) {
-                val cellTurn = boardRepository.getTurn(c-j, r+j)
-                val cellPiece = boardRepository.getPiece(c -j, r+j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
-                else if (cellPiece == KAKU || cellPiece == UMA) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //↗
-        for (j in 1..8) {
-            if (c + j < 9 && 0 <= r - j) {
-                val cellTurn = boardRepository.getTurn(c+j, r-j)
-                val cellPiece = boardRepository.getPiece(c+j, r-j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
-                else if (cellPiece == KAKU || cellPiece == UMA) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-        //↘
-        for (j in 1..8) {
-            if (c + j < 9 && r + j < 9) {
-                val cellTurn = boardRepository.getTurn(c+j, r+j)
-                val cellPiece = boardRepository.getPiece(c+j, r+j)
-                if (cellTurn == turnKing) break
-                else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
-                else if (cellPiece == KAKU || cellPiece == UMA) return true
-                else if (cellTurn != 0) break
-            } else {
-                //盤外
-                break
-            }
-        }
-
-        //桂馬のきき
-        if (turn == BLACK && 0 <= r - 2) {
-            if (0 <= c - 1 && boardRepository.getPiece(c - 1, r - 2) == KEI && boardRepository.getTurn(c - 1, r - 2) != turnKing) return true
-            if (c + 1 < 9 && boardRepository.getPiece(c + 1, r - 2) == KEI && boardRepository.getTurn(c + 1, r - 2) != turnKing) return true
-        } else if (r + 2 < 9) {
-            if (0 <= c - 1 && boardRepository.getPiece(c - 1, r + 2) == KEI && boardRepository.getTurn(c - 1, r + 2) != turnKing) return true
-            if (c + 1 < 9 && boardRepository.getPiece(c + 1, r + 2) == KEI && boardRepository.getTurn(c + 1, r + 2) != turnKing) return true
-        }
-
-        //王手がなかったらfalseを返す
-        return false
-    }
-
-
-
-    //逃げる場所判定
-    private fun checkmate(): Boolean {
-        val turn = if (this.turn == BLACK) WHITE else BLACK
-
-        //逃げる場所 or 防げる駒があるか判定
-        for (i in 0..8) for (j in 0..8) if (boardRepository.getTurn(i, j) == turn) {
-            searchHint(i, j, turn)
-        }
-
-        //もしHint(逃げる場所)がなかったら詰み
-        val count = boardRepository.getCountByHint()
-        boardRepository.resetHint()
-        if (count == 0) {
-            return true
-        }
-        return false
-    }
-
-    //成り判定 強制か否か
-    override fun compulsionEvolutionCheck():Boolean {
-        if (boardRepository.checkForcedevolution()){
-            evolutionPiece(true)
-            return true
-        }
-        return false
-    }
-
-    //成り
-    override fun evolutionPiece(bool: Boolean) {
-        if (bool) boardRepository.setEvolution()
-    }
-
-    //持ち駒を使う場合
+    // 持ち駒を使う場合
     override fun setHintHoldPiece(x: Int, y: Int) {
         boardRepository.resetHint()
         val (newX, newY) = if (y == 10) Pair(x, y) else Pair(8 - x, -1)
         val piece =
-            if (y == 0 && turn == WHITE) boardRepository.findHoldPieceBy(8 - x, turn)
-            else if (y == 10 && turn == BLACK) boardRepository.findHoldPieceBy(x, turn)
-            else None
+            if ((y == 0 && turn == WHITE) || (y == 10 && turn == BLACK)) {
+                boardRepository.findHoldPieceBy(newX, turn)
+            } else {
+                None
+            }
         if (piece == None) return
 
         boardRepository.setPre(newX, newY)
@@ -278,18 +78,18 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLo
             KYO ->
                 for (i in 0..8) {
                     for (j in 1..8) {
-                        val J = if (turn == BLACK) j else 8 - j
-                        if (boardRepository.getTurn(i, J) == 0) {
-                            setHint(newX, newY, i, J, turn)
+                        val k = if (turn == BLACK) j else 8 - j
+                        if (boardRepository.getTurn(i, k) == 0) {
+                            setHint(newX, newY, i, k, turn)
                         }
                     }
                 }
             KEI ->
                 for (i in 0..8) {
                     for (j in 2..8) {
-                        val J = if (turn == BLACK) j else 8 - j
-                        if (boardRepository.getTurn(i, J) == 0) {
-                            setHint(newX, newY, i, J, turn)
+                        val k = if (turn == BLACK) j else 8 - j
+                        if (boardRepository.getTurn(i, k) == 0) {
+                            setHint(newX, newY, i, k, turn)
                         }
                     }
                 }
@@ -298,13 +98,21 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLo
                 val yList = mutableListOf<Int>()
                 for (i in 0..8) {
                     for (j in 0..8) {
-                        if (boardRepository.getTurn(i, j) == turn && boardRepository.getPiece(i, j) == FU) break
+                        if (boardRepository.getTurn(i, j) == turn && boardRepository.getPiece(
+                                i,
+                                j
+                            ) == FU
+                        ) break
                         if (j == 8) {
                             for (k in 1..8) {
-                                val K = if (y == 10) k else k - 1
-                                if (boardRepository.getTurn(i, K) == 0 && !isCheckMateByPossessionFu(newX, newY, i, K, turn)) {
+                                val l = if (y == 10) k else k - 1
+                                if (boardRepository.getTurn(
+                                        i,
+                                        l
+                                    ) == 0 && !isCheckMateByPossessionFu(newX, newY, i, l, turn)
+                                ) {
                                     xList.add(i)
-                                    yList.add(K)
+                                    yList.add(l)
                                 }
                             }
                         }
@@ -318,86 +126,332 @@ class SyogiLogicUseCaseImp(private val boardRepository: BoardRepository):SyogiLo
         }
     }
 
-    // 打ち歩詰め判定
-    private fun isCheckMateByPossessionFu(x:Int, y:Int, newX:Int, newY:Int,turn:Int):Boolean{
+    // ヒント取得
+    private fun searchHint(touchX: Int, touchY: Int, turn: Int) {
+        val moveList: Array<Array<PieceMove>> = boardRepository.getPiece(touchX, touchY).getMove()
+
+        for (moveDirection in moveList) {
+            for (move in moveDirection) {
+                var newX = 0
+                var newY = 0
+                when (turn) {
+                    BLACK -> {
+                        newX = touchX + move.x
+                        newY = touchY + move.y
+                    }
+                    WHITE -> {
+                        newX = touchX - move.x
+                        newY = touchY - move.y
+                    }
+                }
+                // 範囲外か自分のコマとかぶったらその方向の検索はストップ
+                if (newX !in 0..8 || newY !in 0..8 || boardRepository.getTurn(newX, newY) == turn) {
+                    break
+                }
+
+                setHint(touchX, touchY, newX, newY, turn)
+                if (boardRepository.getTurn(newX, newY) != 0) break
+            }
+        }
+    }
+
+    // ヒントを設定する
+    private fun setHint(x: Int, y: Int, newX: Int, newY: Int, turn: Int) {
         boardRepository.setPre(x, y)
         boardRepository.setMove(newX, newY, turn, false)
-        if (checkmate()) {
-            boardRepository.setBackMove()
-            return true
+        val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
+        if (!isCheck(kingX, kingY, turn)) boardRepository.setHint(newX, newY)
+        boardRepository.setPreBackMove()
+    }
+
+    // キャンセル
+    override fun cancel() {
+        boardRepository.resetHint()
+    }
+
+    // endregion
+
+    // region 盤面描画
+
+    // (駒の名前,手番,ヒントの表示)を返す
+    override fun getCellInformation(x: Int, y: Int): Cell {
+        return boardRepository.getCellInformation(x, y)
+    }
+
+    // マスの手番を返す
+    override fun getCellTurn(x: Int, y: Int): Int {
+        val cell = boardRepository.getCellInformation(x, y)
+        return when {
+            cell.hint -> 3
+            cell.turn == BLACK -> BLACK
+            cell.turn == WHITE -> WHITE
+            else -> 4
         }
-        boardRepository.setBackMove()
-        return false
     }
 
-    //(駒の名前,手番,ヒントの表示)を返す
-    override fun getCellInformation(x:Int,y:Int):Triple<String,Int,Boolean>{
-        val cell = boardRepository.getCellInformation(x,y)
-
-        return Triple(cell.piece.nameJP, cell.turn, cell.hint)
-    }
-
-    //(駒の名前,手番,ヒントの表示)を返す
-    override fun getCellTrun(x:Int,y:Int):Int{
-        val cell = boardRepository.getCellInformation(x,y)
-        return if(cell.hint){
-            3
-        }else if(cell.turn == BLACK){
-            BLACK
-        }else if(cell.turn == WHITE){
-            WHITE
-        }else{
-            4
-        }
-    }
-
-    //指定した手番の持ち駒を返す
-    override  fun getPieceHand(turn:Int):MutableList<Pair<Piece,Int>>{
-        val hold = mutableListOf<Pair<Piece,Int>>()
+    // 指定した手番の持ち駒を返す
+    override fun getPieceHand(turn: Int): MutableList<Pair<Piece, Int>> {
+        val hold = mutableListOf<Pair<Piece, Int>>()
         var i = 0
-        boardRepository.getAllHoldPiece(turn).forEach{piece,count ->
-            hold.add(i,Pair(piece,count))
+        boardRepository.getAllHoldPiece(turn).forEach { (piece, count) ->
+            hold.add(i, Pair(piece, count))
             i++
         }
         return hold
     }
 
-    //現在の手番を返す
-    override  fun getTurn():Int{
-        return turn
-    }
-    //手番を設定する
-    override fun setTurn(turn:Int){
-        this.turn = turn
-    }
-    //最後のログを取得する
-    override fun getLogLast(): GameLog {
-        return boardRepository.getLogList()
-    }
-    //動かす駒の元の位置をセットする
-    override fun setPre(x:Int, y:Int){
-        boardRepository.setPre(x, y)
-    }
+    // endregion
+
+    // region ルール
 
     // 千日手判定
     override fun isRepetitionMove(): Boolean {
         positionList.forEach { (_, v) ->
-            if (v >= 4)return true
+            if (v >= 4) return true
         }
         return false
     }
 
     // トライルール判定
     override fun isTryKing(): Boolean {
-        val cell =
-            if (turn == BLACK) {
-                boardRepository.getCellInformation(4,0)
-            } else {
-                boardRepository.getCellInformation(4,8)
+        val cell = when (turn) {
+            BLACK -> boardRepository.getCellInformation(4, 0)
+            WHITE -> boardRepository.getCellInformation(4, 8)
+            else -> null
+        }
+        cell?.let {
+            if ((cell.piece == GYOKU || cell.piece == OU) && cell.turn == turn) {
+                return true
             }
-        if ((cell.piece == GYOKU || cell.piece == OU) && cell.turn == turn) {
+        }
+
+        return false
+    }
+
+    // 終了判定
+    override fun isGameEnd(): Boolean {
+        val turnOpponent = if (turn == BLACK) WHITE else BLACK
+        val (kingX: Int, kingY: Int) = boardRepository.findKing(turnOpponent)
+
+        // もし王手&詰み判定
+        if (isCheck(kingX, kingY, turnOpponent) && (isCheckmate())) {
+            return true
+        }
+        turn = if (turn == BLACK) WHITE else BLACK
+        return false
+    }
+
+    // 王手判定
+    private fun isCheck(x: Int, y: Int, turnKing: Int): Boolean {
+        // ↑
+        for (j in 1..8) {
+            val moveY = y - j
+            if (moveY < 0) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(x, moveY)
+            val cellPiece = boardRepository.getPiece(x, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalUpMovePiece() && turnKing == BLACK) || (cellPiece.equalDownMovePiece() && turnKing == WHITE))) return true
+            else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
+            else if (cellTurn != 0) break
+        }
+        // ↓
+        for (j in 1..8) {
+            val moveY = y + j
+            if (9 <= moveY) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(x, moveY)
+            val cellPiece = boardRepository.getPiece(x, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalDownMovePiece() && turnKing == BLACK) || (cellPiece.equalUpMovePiece() && turnKing == WHITE))) return true
+            else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
+            else if (cellTurn != 0) break
+        }
+        // ←
+        for (j in 1..8) {
+            val moveX = x - j
+            if (moveX < 0) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, y)
+            val cellPiece = boardRepository.getPiece(moveX, y)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && cellPiece.equalLRMovePiece()) return true
+            else if (cellPiece.equalLongLRMovePiece()) return true
+            else if (cellTurn != 0) break
+        }
+        // →
+        for (j in 1..8) {
+            val moveX = x + j
+            if (9 <= moveX) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, y)
+            val cellPiece = boardRepository.getPiece(moveX, y)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && cellPiece.equalLRMovePiece()) return true
+            else if (cellPiece.equalLongLRMovePiece()) return true
+            else if (cellTurn != 0) break
+        }
+        // ↖
+        for (j in 1..8) {
+            val moveX = x - j
+            val moveY = y - j
+            if (moveX < 0 || moveY < 0) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, moveY)
+            val cellPiece = boardRepository.getPiece(moveX, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
+            else if (cellPiece == KAKU || cellPiece == UMA) return true
+            else if (cellTurn != 0) break
+
+        }
+        // ↙
+        for (j in 1..8) {
+            val moveX = x - j
+            val moveY = y + j
+            if (moveX < 0 && 9 <= moveY) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, moveY)
+            val cellPiece = boardRepository.getPiece(moveX, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
+            else if (cellPiece == KAKU || cellPiece == UMA) return true
+            else if (cellTurn != 0) break
+        }
+        // ↗
+        for (j in 1..8) {
+            val moveX = x + j
+            val moveY = y - j
+            if (9 <= moveX && moveY < 0) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, moveY)
+            val cellPiece = boardRepository.getPiece(moveX, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalDiagonalUp() && turnKing == BLACK) || (cellPiece.equalDiagonalDown() && turnKing == WHITE))) return true
+            else if (cellPiece == KAKU || cellPiece == UMA) return true
+            else if (cellTurn != 0) break
+        }
+        // ↘
+        for (j in 1..8) {
+            val moveX = x + j
+            val moveY = y + j
+            if (9 <= moveX && 9 <= moveY) break
+
+            // 判定
+            val cellTurn = boardRepository.getTurn(moveX, moveY)
+            val cellPiece = boardRepository.getPiece(moveX, moveY)
+            if (cellTurn == turnKing) break
+            else if (j == 1 && ((cellPiece.equalDiagonalDown() && turnKing == BLACK) || (cellPiece.equalDiagonalUp() && turnKing == WHITE))) return true
+            else if (cellPiece == KAKU || cellPiece == UMA) return true
+            else if (cellTurn != 0) break
+        }
+
+        // 桂馬のきき
+        val y1 = y - 2
+        val y2 = y + 2
+        val x1 = x - 1
+        val x2 = x + 1
+        if (turn == BLACK && 0 <= y1) {
+            if (0 <= x1 && boardRepository.getPiece(x1, y1) == KEI && boardRepository.getTurn(
+                    x1,
+                    y1
+                ) != turnKing
+            ) return true
+            if (x2 < 9 && boardRepository.getPiece(x2, y1) == KEI && boardRepository.getTurn(
+                    x2,
+                    y1
+                ) != turnKing
+            ) return true
+        } else if (turn == WHITE && y2 < 9) {
+            if (0 <= x1 && boardRepository.getPiece(x1, y2) == KEI && boardRepository.getTurn(
+                    x1,
+                    y2
+                ) != turnKing
+            ) return true
+            if (x2 < 9 && boardRepository.getPiece(x2, y2) == KEI && boardRepository.getTurn(
+                    x2,
+                    y2
+                ) != turnKing
+            ) return true
+        }
+
+        // 王手がなかったらfalseを返す
+        return false
+    }
+
+    // 逃げる場所判定
+    private fun isCheckmate(): Boolean {
+        val turn = if (this.turn == BLACK) WHITE else BLACK
+
+        // 逃げる場所 or 防げる駒があるか判定
+        for (i in 0..8) {
+            for (j in 0..8) {
+                if (boardRepository.getTurn(i, j) == turn) {
+                    searchHint(i, j, turn)
+                }
+            }
+        }
+        // 持ち駒使う
+        getPieceHand(turn).forEachIndexed { index, piece ->
+            if (piece.second != 0) {
+                val (x, y) =
+                    if (turn == BLACK) {
+                        Pair(index + 2, 10)
+                    } else {
+                        Pair(8 - (index + 2), 0)
+                    }
+                setHintHoldPiece(x, y)
+            }
+        }
+
+        // もしHint(逃げる場所)がなかったら詰み
+        val count = boardRepository.getCountByHint()
+        boardRepository.resetHint()
+        return count == 0
+    }
+
+    // 打ち歩詰め判定
+    private fun isCheckMateByPossessionFu(
+        x: Int,
+        y: Int,
+        newX: Int,
+        newY: Int,
+        turn: Int
+    ): Boolean {
+        boardRepository.setPre(x, y)
+        boardRepository.setMove(newX, newY, turn, false)
+        val result = isCheckmate()
+        boardRepository.setPreBackMove()
+        return result
+    }
+
+    // 成り判定
+    override fun isEvolution(x: Int, y: Int): Boolean {
+        val preY = boardRepository.findLogY()
+        return (preY in 0..8 && boardRepository.getPiece(x, y)
+            .findEvolution()) && ((turn == BLACK && (y <= 2 || preY <= 2)) || (turn == WHITE && (6 <= y || 6 <= preY)))
+    }
+
+    // 成り判定 強制か否か
+    override fun isCompulsionEvolution(): Boolean {
+        if (boardRepository.isCompulsionEvolution()) {
+            setEvolution()
             return true
         }
         return false
     }
+
+    // 成り
+    override fun setEvolution() {
+        boardRepository.setEvolution()
+    }
+
+    // endregion
 }

@@ -8,7 +8,12 @@ import android.view.MotionEvent
 import android.view.View
 
 //勝った時の勝敗表示View
-class WinLoseModal(context: Context, private val turn: Int,private val w:Float, private val h:Float) : View(context) {
+class WinLoseModal(
+    context: Context,
+    private val turn: Int,
+    private val w: Float,
+    private val h: Float
+) : View(context) {
 
     private var mas: Float = 0.toFloat()//ひとまず分の大きさメモ
 
