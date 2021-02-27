@@ -218,7 +218,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
-        useCase.setTouchHint(4, 4)
+        useCase.setTouchHint(5, 5)
         verify(boarRepository, times(8)).setHint(any(), any())
     }
 
@@ -231,12 +231,12 @@ class SyogiLogicUseCaseTest {
     fun setTouchHintTop() {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
-        cells[0][0].piece = Piece.OU
-        cells[0][0].turn = 1
+        cells[8][0].piece = Piece.OU
+        cells[8][0].turn = 1
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
-        useCase.setTouchHint(0, 0)
+        useCase.setTouchHint(9, 1)
         verify(boarRepository, times(3)).setHint(any(), any())
     }
 
@@ -254,7 +254,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
-        useCase.setTouchHint(8, 8)
+        useCase.setTouchHint(9, 9)
         verify(boarRepository, times(3)).setHint(any(), any())
     }
 
@@ -288,7 +288,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
-        useCase.setTouchHint(4, 4)
+        useCase.setTouchHint(5, 5)
         verify(boarRepository, never()).setHint(any(), any())
     }
 
@@ -315,7 +315,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
-        useCase.setTouchHint(4, 4)
+        useCase.setTouchHint(5, 5)
         verify(boarRepository, never()).setHint(any(), any())
     }
 
@@ -551,7 +551,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
         useCase.setMove(3, 3, false)
-        verify(repository, times(1)).setMove(eq(3), eq(3), anyInt(), eq(false))
+        verify(repository, times(1)).setMove(eq(2), eq(2), anyInt(), eq(false))
         verify(repository, times(1)).setHoldPiece()
         verify(repository, times(1)).resetHint()
     }
@@ -574,7 +574,7 @@ class SyogiLogicUseCaseTest {
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        val result = useCase.isEvolution(2, 2)
+        val result = useCase.isEvolution(3, 3)
         assertEquals(result, true)
     }
 
@@ -592,7 +592,7 @@ class SyogiLogicUseCaseTest {
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        val result = useCase.isEvolution(2, 7)
+        val result = useCase.isEvolution(3, 8)
         assertEquals(result, true)
     }
 
@@ -610,7 +610,7 @@ class SyogiLogicUseCaseTest {
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        val result = useCase.isEvolution(2, 2)
+        val result = useCase.isEvolution(3, 3)
         assertEquals(result, true)
     }
 
@@ -623,18 +623,18 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckBlackByStayY2() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(7, 7)
-            on { getPiece(2, 7) } doReturn Piece.HISYA
+            on { getBeforePieceCoordinate() } doReturn PieceMove(7, 6)
+            on { getPiece(2, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        val result = useCase.isEvolution(2, 7)
+        val result = useCase.isEvolution(3, 7)
         assertEquals(result, false)
     }
 
     /**
      * 成り判定メソッド
-     * 条件：先手番でコマが敵陣から自陣へ移動した時
+     * 条件：後手番でコマが敵陣から自陣へ移動した時
      * 結果：trueが返る
      */
     @Test
@@ -642,20 +642,20 @@ class SyogiLogicUseCaseTest {
         // テストクラス作成
         val repository = mock<BoardRepository> {
             on { getBeforePieceCoordinate() } doReturn PieceMove(2, 2)
-            on { getPiece(2, 7) } doReturn Piece.HISYA
+            on { getPiece(2, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(2, 7)
+        val result = useCase.isEvolution(3, 7)
         assertEquals(result, true)
     }
 
     /**
      * 成り判定メソッド
-     * 条件：先手番でコマが自陣から敵陣へ移動した時
+     * 条件：後手番でコマが自陣から敵陣へ移動した時
      * 結果：trueが返る
      */
     @Test
@@ -670,13 +670,13 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(2, 2)
+        val result = useCase.isEvolution(3, 3)
         assertEquals(result, true)
     }
 
     /**
      * 成り判定メソッド
-     * 条件：先手番でコマが自陣内で移動した時
+     * 条件：後手番でコマが自陣内で移動した時
      * 結果：trueが返る
      */
     @Test
@@ -691,28 +691,28 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(7, 2)
+        val result = useCase.isEvolution(8, 3)
         assertEquals(result, false)
     }
 
     /**
      * 成り判定メソッド
-     * 条件：先手番でコマが敵陣内で移動した時
+     * 条件：後手番でコマが敵陣内で移動した時
      * 結果：trueが返る
      */
     @Test
     fun evolutionCheckWhiteByStayY2() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 7)
-            on { getPiece(7, 7) } doReturn Piece.HISYA
+            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 6)
+            on { getPiece(7, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(7, 7)
+        val result = useCase.isEvolution(8, 7)
         assertEquals(result, true)
     }
 
@@ -782,7 +782,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 1
         cell.hint = false
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -804,7 +804,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 1
         cell.hint = true
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -826,7 +826,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 2
         cell.hint = false
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -848,7 +848,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 2
         cell.hint = true
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -870,7 +870,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 0
         cell.hint = false
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -892,7 +892,7 @@ class SyogiLogicUseCaseTest {
         cell.turn = 0
         cell.hint = true
         val repository = mock<BoardRepository> {
-            on { getCellInformation(5, 5) } doReturn cell
+            on { getCellInformation(4, 4) } doReturn cell
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)

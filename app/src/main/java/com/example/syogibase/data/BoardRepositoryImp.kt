@@ -61,7 +61,7 @@ class BoardRepositoryImp : BoardRepository {
 
     // 駒落ち設定
     override fun setHandicap(turn: Int, handicap: Int) {
-        board.setHandi(turn, handicap)
+        board.setHandicap(turn, handicap)
     }
 
     //ヒントセット
@@ -163,8 +163,8 @@ class BoardRepositoryImp : BoardRepository {
 
     //持ち駒マスから取得
     override fun findHoldPieceBy(i: Int, turn: Int): Piece {
-        if (turn == 1 && board.holdPieceBlack[changeIntToPiece(i)] == 0 ||
-            turn == 2 && board.holdPieceWhite[changeIntToPiece(i)] == 0
+        if (turn == BLACK && board.holdPieceBlack[changeIntToPiece(i)] == 0 ||
+            turn == WHITE && board.holdPieceWhite[changeIntToPiece(i)] == 0
         ) return None
 
         return changeIntToPiece(i)
@@ -232,7 +232,7 @@ class BoardRepositoryImp : BoardRepository {
 
     // 打ったコマの打つ前の座標を返す
     override fun getBeforePieceCoordinate(): PieceMove {
-        return PieceMove(logList.last().oldY, logList.last().oldX)
+        return PieceMove(logList.last().oldX, logList.last().oldY)
     }
 
     //強制的にならないといけない駒かチェック

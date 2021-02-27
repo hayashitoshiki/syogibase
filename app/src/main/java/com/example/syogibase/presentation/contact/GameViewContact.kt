@@ -30,7 +30,7 @@ interface GameViewContact {
 
     interface Presenter {
         // タッチイベントロジック
-        fun onTouchEvent(x: Int, y: Int)
+        fun onTouchEvent(touchX: Int, touchY: Int)
 
         // 描画ロジック
         fun drawView()
