@@ -15,10 +15,10 @@ class Board {
     }
 
     // ９×９の将棋盤
-    val cells = Array(COLS, { Array(ROWS, { Cell() }) })
+    val cells = Array(COLS) { Array(ROWS) { Cell() } }
 
     // 持ち駒　名前　数
-    var holdPieceBlack = mutableMapOf<Piece, Int>(
+    var holdPieceBlack = mutableMapOf(
         FU to 0,
         KYO to 0,
         KEI to 0,
@@ -28,7 +28,7 @@ class Board {
         HISYA to 0
     )
 
-    var holdPieceWhite = mutableMapOf<Piece, Int>(
+    var holdPieceWhite = mutableMapOf(
         FU to 0,
         KYO to 0,
         KEI to 0,
@@ -93,6 +93,15 @@ class Board {
                 cells[i][0].turn = WHITE
                 cells[i][8].piece = KYO
                 cells[i][8].turn = BLACK
+            }
+        }
+    }
+
+    // カスタム初期値設定
+    fun setBoard(customBoard: Array<Array<Cell>>) {
+        for (i in 0..8) {
+            for (j in 0..8) {
+                cells[i][j] = customBoard[i][j]
             }
         }
     }

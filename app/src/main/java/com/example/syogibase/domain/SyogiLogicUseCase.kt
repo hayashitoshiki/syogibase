@@ -13,6 +13,9 @@ interface SyogiLogicUseCase {
     // 駒落ち設定
     fun setHandicap(turn: Int, handicap: Int)
 
+    // 指定した盤面設定
+    fun setBoard(customBoard: Array<Array<Cell>>)
+
     // ヒントセットする
     fun setTouchHint(x: Int, y: Int)
 
@@ -20,7 +23,7 @@ interface SyogiLogicUseCase {
     fun setMove(x: Int, y: Int, evolution: Boolean)
 
     // 持ち駒を使う場合
-    fun setHintHoldPiece(x: Int, y: Int)
+    fun setHintHoldPiece(x: Int, y: Int, kingTurn: Int)
 
     // キャンセル
     fun cancel()

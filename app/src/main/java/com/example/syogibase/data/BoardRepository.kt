@@ -2,6 +2,7 @@ package com.example.syogibase.data
 
 import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.local.PieceMove
 
 
 interface BoardRepository {
@@ -69,12 +70,14 @@ interface BoardRepository {
 
     // endregion
 
-    // 打った駒の打つ前のY軸取得
-    fun findLogY(): Int
+    // 打ったコマの打つ前の座標取得
+    fun getBeforePieceCoordinate(): PieceMove
 
     // 指定した手番の王様の座標を返す
     fun findKing(turn: Int): Pair<Int, Int>
 
     // 強制的にならないといけない駒かチェック
     fun isCompulsionEvolution(): Boolean
+
+    fun setBoard(customBoard: Array<Array<Cell>>)
 }

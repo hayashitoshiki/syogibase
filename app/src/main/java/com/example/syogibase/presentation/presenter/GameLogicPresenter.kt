@@ -39,7 +39,7 @@ class GameLogicPresenter(
     // タッチ判定
     override fun onTouchEvent(x: Int, y: Int) {
         // 持ち駒
-        if (y == 0 || y == 10) useCase.setHintHoldPiece(x, y)
+        if (y == 0 || y == 10) useCase.setHintHoldPiece(x, y, useCase.getTurn())
         // 盤上
         else if (x in 0..8 && y in 1..9) {
             when (useCase.getCellTurn(x, y - 1)) {

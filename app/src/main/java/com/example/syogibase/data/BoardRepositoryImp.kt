@@ -2,10 +2,7 @@ package com.example.syogibase.data
 
 
 import android.util.Log
-import com.example.syogibase.data.local.Board
-import com.example.syogibase.data.local.Cell
-import com.example.syogibase.data.local.GameLog
-import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.local.*
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.util.BLACK
 import com.example.syogibase.util.WHITE
@@ -19,6 +16,10 @@ class BoardRepositoryImp : BoardRepository {
     private var previousY: Int = 0
     private var previousPiece: Piece = None
 
+    // カスタム初期値設定
+    override fun setBoard(customBoard: Array<Array<Cell>>) {
+        board.setBoard(customBoard)
+    }
     // region マスの情報取得
 
     // 局面を取得
@@ -173,7 +174,7 @@ class BoardRepositoryImp : BoardRepository {
     override fun setHoldPiece() {
         val log: GameLog = logList.last()
         if (log.beforpiece != None) {
-            if (log.beforturn == 2) {
+            if (log.beforturn == WHITE) {
                 when (log.beforpiece) {
                     FU, TO -> board.holdPieceBlack[FU] =
                         board.holdPieceBlack[FU]!! + 1
@@ -191,7 +192,7 @@ class BoardRepositoryImp : BoardRepository {
                         board.holdPieceBlack[KAKU]!! + 1
                     else -> Log.e("BoaedRepository", "不正な駒を取ろうとしています")
                 }
-            } else if (log.beforturn == 1) {
+            } else if (log.beforturn == BLACK) {
                 when (log.beforpiece) {
                     FU, TO -> board.holdPieceWhite[FU] =
                         board.holdPieceWhite[FU]!! + 1
@@ -229,9 +230,9 @@ class BoardRepositoryImp : BoardRepository {
 
     // endregion
 
-    //打った駒の打つ前のY軸取得
-    override fun findLogY(): Int {
-        return logList.last().oldY
+    // 打ったコマの打つ前の座標を返す
+    override fun getBeforePieceCoordinate(): PieceMove {
+        return PieceMove(logList.last().oldY, logList.last().oldX)
     }
 
     //強制的にならないといけない駒かチェック
