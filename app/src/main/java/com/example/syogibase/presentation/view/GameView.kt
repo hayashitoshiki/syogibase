@@ -3,10 +3,12 @@ package com.example.syogibase.presentation.view
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
+import android.os.Handler
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
 import com.example.syogibase.presentation.contact.GameViewContact
+import com.example.syogibase.util.BoardMode
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
@@ -15,6 +17,16 @@ import org.koin.core.parameter.parametersOf
 class GameView(private val activity: GameActivity, context: Context, width: Int, height: Int) :
     View(context), GameViewContact.View,
     KoinComponent {
+
+    // ゲームモード
+    private var mode: BoardMode = BoardMode.GAME
+    private val longPressHandler = Handler()
+    private val longPressBack = Runnable {
+        presenter.setGoLastMove()
+    }
+    private val longPressGo = Runnable {
+        presenter.setBackFirstMove()
+    }
 
     private val presenter: GameViewContact.Presenter by inject { parametersOf(this) }
     private lateinit var canvas: Canvas
@@ -47,16 +59,46 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         val c = (event.x / cw).toInt()
         val r = (event.y / ch - median).toInt()
 
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
+        when (mode) {
+            BoardMode.GAME -> {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        presenter.onTouchEvent(c, r)
+                        invalidate()
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                    }
+                }
             }
-            MotionEvent.ACTION_UP -> {
-                presenter.onTouchEvent(c, r)
-                invalidate()
-            }
-            MotionEvent.ACTION_MOVE -> {
-            }
-            MotionEvent.ACTION_CANCEL -> {
+            BoardMode.REPLAY -> {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        if (c in 4..8) {
+                            longPressHandler.postDelayed(longPressGo, 800)
+                        } else if (c in 0..4) {
+                            longPressHandler.postDelayed(longPressBack, 800)
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        // TODO　後で絶対修正！！！
+                        if (c in 4..8) {
+                            presenter.setGoMove()
+                            longPressHandler.removeCallbacks(longPressGo)
+                        } else if (c in 0..4) {
+                            presenter.setBackMove()
+                            longPressHandler.removeCallbacks(longPressBack)
+                        }
+                        invalidate()
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                    }
+                }
             }
         }
 
@@ -155,6 +197,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
 
     //終了ダイアログ表示
     override fun gameEnd(turn: Int) {
+        mode = BoardMode.REPLAY
         activity.gameEnd(turn)
     }
 

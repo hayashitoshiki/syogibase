@@ -7,7 +7,9 @@ import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.data.local.PieceMove
 import com.example.syogibase.util.BLACK
+import com.example.syogibase.util.BLACK_HOLD
 import com.example.syogibase.util.WHITE
+import com.example.syogibase.util.WHITE_HOLD
 
 class SyogiLogicUseCaseImp(
     private val boardRepository: BoardRepository
@@ -44,7 +46,8 @@ class SyogiLogicUseCaseImp(
     override fun setMove(x: Int, y: Int, evolution: Boolean) {
         var position = ""
         boardRepository.setMove(x - 1, y - 1, turn, evolution)
-        boardRepository.setHoldPiece()
+        val log = boardRepository.getLogByIndex(boardRepository.getLogSize() - 1)
+        boardRepository.setHoldPiece(log)
         boardRepository.resetHint()
         boardRepository.getBoard().forEach {
             it.forEach { cell ->
@@ -56,13 +59,14 @@ class SyogiLogicUseCaseImp(
         } else {
             positionList[position] = 1
         }
+        logIndex = boardRepository.getLogSize() - 1
     }
 
     // 持ち駒を使う場合
     override fun setHintHoldPiece(x: Int, y: Int, kingTurn: Int) {
         boardRepository.resetHint()
         val piece =
-            if ((y == -1 && kingTurn == WHITE) || (y == 10 && kingTurn == BLACK)) {
+            if ((y == WHITE_HOLD && kingTurn == WHITE) || (y == BLACK_HOLD && kingTurn == BLACK)) {
                 boardRepository.findHoldPieceBy(x, kingTurn)
             } else {
                 None
@@ -109,7 +113,7 @@ class SyogiLogicUseCaseImp(
                         ) break
                         if (j == 8) {
                             for (k in 1..8) {
-                                val l = if (y == 10) k else k - 1
+                                val l = if (y == BLACK_HOLD) k else k - 1
                                 if (boardRepository.getTurn(
                                         i,
                                         l
@@ -249,7 +253,7 @@ class SyogiLogicUseCaseImp(
             val cellPiece = boardRepository.getPiece(x, moveY)
             if (cellTurn == turnKing) break
             else if (j == 1 && ((cellPiece.equalUpMovePiece() && turnKing == BLACK) || (cellPiece.equalDownMovePiece() && turnKing == WHITE))) return true
-            else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == BLACK && turnKing == WHITE)) return true
+            else if ((cellPiece == HISYA || cellPiece == RYU) || (cellPiece == KYO && cellTurn == WHITE && turnKing == BLACK)) return true
             else if (cellTurn != 0) break
         }
         // ↓
@@ -358,23 +362,23 @@ class SyogiLogicUseCaseImp(
             if (0 <= x1 && boardRepository.getPiece(x1, y1) == KEI && boardRepository.getTurn(
                     x1,
                     y1
-                ) != turnKing
+                ) == WHITE
             ) return true
             if (x2 < 9 && boardRepository.getPiece(x2, y1) == KEI && boardRepository.getTurn(
                     x2,
                     y1
-                ) != turnKing
+                ) == WHITE
             ) return true
         } else if (turnKing == WHITE && y2 < 9) {
             if (0 <= x1 && boardRepository.getPiece(x1, y2) == KEI && boardRepository.getTurn(
                     x1,
                     y2
-                ) != turnKing
+                ) == BLACK
             ) return true
             if (x2 < 9 && boardRepository.getPiece(x2, y2) == KEI && boardRepository.getTurn(
                     x2,
                     y2
-                ) != turnKing
+                ) == BLACK
             ) return true
         }
 
@@ -394,21 +398,20 @@ class SyogiLogicUseCaseImp(
                 }
             }
         }
+        var count = boardRepository.getCountByHint()
         // 持ち駒使う
         getPieceHand(kingTurn).forEachIndexed { index, piece ->
             if (piece.second != 0) {
                 val (x, y) =
                     if (kingTurn == BLACK) {
-                        Pair(index + 2, 10)
+                        Pair(index + 2, BLACK_HOLD)
                     } else {
-                        Pair(index + 2, -1)
+                        Pair(index + 2, WHITE_HOLD)
                     }
                 setHintHoldPiece(x, y, kingTurn)
+                count += boardRepository.getCountByHint()
             }
         }
-
-        // もしHint(逃げる場所)がなかったら詰み
-        val count = boardRepository.getCountByHint()
         boardRepository.resetHint()
         return count == 0
     }
@@ -448,6 +451,45 @@ class SyogiLogicUseCaseImp(
     override fun setEvolution() {
         boardRepository.setEvolution()
     }
+
+    // endregion
+
+    // region 棋譜保存
+
+    private var logIndex = 0
+
+    // 一手進む
+    override fun setGoMove() {
+        if (logIndex < (boardRepository.getLogSize() - 1)) {
+            logIndex += 1
+            val log = boardRepository.getLogByIndex(logIndex)
+            boardRepository.setGoMove(log)
+        }
+    }
+
+    // 一手戻す
+    override fun setBackMove() {
+        if (0 <= logIndex) {
+            val log = boardRepository.getLogByIndex(logIndex)
+            boardRepository.setBackMove(log)
+            logIndex -= 1
+        }
+    }
+
+    // 最初まで戻る
+    override fun setBackFirstMove() {
+        while (logIndex < (boardRepository.getLogSize() - 1)) {
+            setGoMove()
+        }
+    }
+
+    // 最後まで進む
+    override fun setGoLastMove() {
+        while (0 <= logIndex) {
+            setBackMove()
+        }
+    }
+
 
     // endregion
 }

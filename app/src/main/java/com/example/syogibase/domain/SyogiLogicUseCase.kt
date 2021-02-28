@@ -64,4 +64,21 @@ interface SyogiLogicUseCase {
     fun setEvolution()
 
     // endregion
+
+    // region 棋譜保存
+
+    // 一手戻す
+    fun setBackMove()
+
+    // 一手進む
+    fun setGoMove()
+
+    // 最初まで戻る
+    fun setBackFirstMove()
+
+    // 最後まで進む
+    fun setGoLastMove()
+
+
+    // endregion
 }

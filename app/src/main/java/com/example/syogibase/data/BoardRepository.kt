@@ -1,6 +1,7 @@
 package com.example.syogibase.data
 
 import com.example.syogibase.data.local.Cell
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.PieceMove
 
@@ -11,6 +12,9 @@ interface BoardRepository {
 
     // 局面を取得
     fun getBoard(): Array<Array<Cell>>
+
+    // ログ設定
+    fun setLog(log: MutableList<GameLog>)
 
     // 指定したマスの情報を返す
     fun getCellInformation(x: Int, y: Int): Cell
@@ -66,7 +70,7 @@ interface BoardRepository {
     fun findHoldPieceBy(i: Int, turn: Int): Piece
 
     // 持ち駒追加
-    fun setHoldPiece()
+    fun setHoldPiece(log: GameLog)
 
     // endregion
 
@@ -80,4 +84,20 @@ interface BoardRepository {
     fun isCompulsionEvolution(): Boolean
 
     fun setBoard(customBoard: Array<Array<Cell>>)
+
+    // region 棋譜再生
+
+    // １手進める(感想戦)
+    fun setGoMove(log: GameLog)
+
+    // １手戻す(感想戦)
+    fun setBackMove(log: GameLog)
+
+    // 指定したログ取得
+    fun getLogByIndex(index: Int): GameLog
+
+    // ログサイズ取得
+    fun getLogSize(): Int
+
+    // endregion
 }

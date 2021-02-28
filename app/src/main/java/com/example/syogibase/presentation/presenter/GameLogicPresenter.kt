@@ -4,9 +4,7 @@ import com.example.syogibase.data.local.Board.Companion.COLS
 import com.example.syogibase.data.local.Board.Companion.ROWS
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.HINT
-import com.example.syogibase.util.WHITE
+import com.example.syogibase.util.*
 
 class GameLogicPresenter(
     private val view: GameViewContact.View,
@@ -47,11 +45,11 @@ class GameLogicPresenter(
             when (useCase.getTurn()) {
                 BLACK -> {
                     x = touchX
-                    y = touchY
+                    y = BLACK_HOLD
                 }
                 WHITE -> {
                     x = 8 - touchX
-                    y = -1
+                    y = WHITE_HOLD
                 }
             }
             useCase.setHintHoldPiece(x, y, useCase.getTurn())
@@ -80,6 +78,32 @@ class GameLogicPresenter(
         // 盤外
         else useCase.cancel()
     }
+
+    // 感想戦モード
+
+    // １手戻る
+    override fun setBackMove() {
+        useCase.setBackMove()
+    }
+
+    // 最初まで戻る
+    override fun setBackFirstMove() {
+        useCase.setBackFirstMove()
+    }
+
+    // １手進む
+    override fun setGoMove() {
+        useCase.setGoMove()
+    }
+
+    // 最後まで進む
+    override fun setGoLastMove() {
+        useCase.setGoLastMove()
+    }
+
+    // 対局モード
+
+    // 通信対戦モード
 
     // 成り判定
     override fun evolutionPiece() {

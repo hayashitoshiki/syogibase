@@ -37,5 +37,17 @@ interface GameViewContact {
 
         // 成り
         fun evolutionPiece()
+
+        // １手進む
+        fun setGoMove()
+
+        // 最初まで戻る
+        fun setBackFirstMove()
+
+        // 最後まで進む
+        fun setGoLastMove()
+
+        // １手戻る
+        fun setBackMove()
     }
 }
