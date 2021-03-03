@@ -241,7 +241,7 @@ enum class Piece(val nameJP: String) {
             GIN -> N_GIN
             HISYA -> RYU
             KAKU -> UMA
-            else -> None
+            else -> this
         }
     }
 
@@ -257,7 +257,7 @@ enum class Piece(val nameJP: String) {
             KIN -> KIN
             OU -> OU
             GYOKU -> GYOKU
-            else -> None
+            else -> this
         }
     }
 

@@ -3,7 +3,6 @@ package com.example.syogibase.data
 import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
-import com.example.syogibase.data.local.PieceMove
 
 
 interface BoardRepository {
@@ -12,9 +11,6 @@ interface BoardRepository {
 
     // 局面を取得
     fun getBoard(): Array<Array<Cell>>
-
-    // ログ設定
-    fun setLog(log: MutableList<GameLog>)
 
     // 指定したマスの情報を返す
     fun getCellInformation(x: Int, y: Int): Cell
@@ -31,6 +27,9 @@ interface BoardRepository {
     // ヒントが表示されているマスの数を返す
     fun getCountByHint(): Int
 
+    // 指定した手番の王様の座標を返す
+    fun findKing(turn: Int): Pair<Int, Int>
+
     // endregion
 
     // region マスの情報更新
@@ -38,23 +37,23 @@ interface BoardRepository {
     // 駒落ち設定
     fun setHandicap(turn: Int, handicap: Int)
 
+    // 指定した盤面を設定する
+    fun setBoard(customBoard: Array<Array<Cell>>)
+
+    // １手進める
+    fun setGoMove(log: GameLog)
+
+    // １手戻す
+    fun setBackMove(log: GameLog)
+
     // ヒントセット
     fun setHint(x: Int, y: Int)
-
-    // １手戻す(ヒント)
-    fun setPreBackMove()
 
     // ヒントリセット
     fun resetHint()
 
-    // 駒を動かす
-    fun setMove(x: Int, y: Int, turn: Int, evolution: Boolean)
-
     // 成る
-    fun setEvolution()
-
-    // 動かす前の駒の状態をセット
-    fun setPre(x: Int, y: Int)
+    fun setEvolution(log: GameLog)
 
     // endregion
 
@@ -69,35 +68,8 @@ interface BoardRepository {
     // 持ち駒マスから取得
     fun findHoldPieceBy(i: Int, turn: Int): Piece
 
-    // 持ち駒追加
-    fun setHoldPiece(log: GameLog)
-
+    // 持ち駒台の座標から駒を取得(本当はよくない)
+    fun changeIntToPiece(i: Int): Piece
     // endregion
 
-    // 打ったコマの打つ前の座標取得
-    fun getBeforePieceCoordinate(): PieceMove
-
-    // 指定した手番の王様の座標を返す
-    fun findKing(turn: Int): Pair<Int, Int>
-
-    // 強制的にならないといけない駒かチェック
-    fun isCompulsionEvolution(): Boolean
-
-    fun setBoard(customBoard: Array<Array<Cell>>)
-
-    // region 棋譜再生
-
-    // １手進める(感想戦)
-    fun setGoMove(log: GameLog)
-
-    // １手戻す(感想戦)
-    fun setBackMove(log: GameLog)
-
-    // 指定したログ取得
-    fun getLogByIndex(index: Int): GameLog
-
-    // ログサイズ取得
-    fun getLogSize(): Int
-
-    // endregion
 }

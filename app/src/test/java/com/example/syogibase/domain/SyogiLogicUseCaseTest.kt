@@ -4,8 +4,8 @@ import com.example.syogibase.data.BoardRepository
 import com.example.syogibase.data.BoardRepositoryImp
 import com.example.syogibase.data.local.Board
 import com.example.syogibase.data.local.Cell
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
-import com.example.syogibase.data.local.PieceMove
 import com.example.syogibase.util.BLACK
 import com.example.syogibase.util.BLACK_HOLD
 import com.example.syogibase.util.WHITE
@@ -246,6 +246,10 @@ class SyogiLogicUseCaseTest {
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
+        val log = mutableListOf(GameLog(4, 7, Piece.KIN, WHITE, 4, 7, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         val result = useCase.isGameEnd()
         assertEquals(result, true)
     }
@@ -527,12 +531,15 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceFU() {
+        val cell = Cell()
         val repository = mock<BoardRepository> {
             on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.FU
             on { findKing(anyInt()) } doReturn Pair(5, 5)
             on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
             on { getTurn(any(), any()) } doReturn 0
             on { getCountByHint() } doReturn 2
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
+            on { changeIntToPiece(anyInt()) } doReturn Piece.FU
         }
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
@@ -577,8 +584,8 @@ class SyogiLogicUseCaseTest {
 
     /**
      * 持ち駒の打てる場所判定関数
-     * 条件；歩をタップした場合
-     * 結果：72回useCaseのsetHint()が呼ばれる
+     * 条件；金をタップした場合
+     * 結果：79回useCaseのsetHint()が呼ばれる
      */
     @Test
     fun getHintHoldPieceOther() {
@@ -604,12 +611,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceKYO() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.KYO
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.KYO).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(72)).setHint(anyInt(), anyInt())
@@ -622,12 +628,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceKEI() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.KEI
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.KEI).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(63)).setHint(any(), any())
@@ -640,12 +645,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceGIN() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.GIN
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.GIN).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(81)).setHint(any(), any())
@@ -658,13 +662,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceKIN() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.KIN
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
-
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.KIN).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(81)).setHint(any(), any())
@@ -677,13 +679,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceHISYA() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.HISYA
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
-
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.HISYA).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(81)).setHint(any(), any())
@@ -696,13 +696,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun getHintHoldPieceKAKU() {
-        val repository = mock<BoardRepository> {
-            on { findHoldPieceBy(anyInt(), anyInt()) } doReturn Piece.KAKU
-            on { findKing(anyInt()) } doReturn Pair(5, 5)
-            on { getPiece(anyInt(), anyInt()) } doReturn Piece.None
-        }
-
+        val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val repository = spy(BoardRepositoryImp())
         val useCase = SyogiLogicUseCaseImp(repository)
+        doReturn(Piece.KAKU).whenever(repository).findHoldPieceBy(any(), any())
+        useCase.setBoard(cells)
         // 実行
         useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
         verify(repository, times(81)).setHint(anyInt(), anyInt())
@@ -739,16 +737,16 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setMove() {
-        // テストクラス作成
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
+        val cell = Cell()
         val repository = mock<BoardRepository> {
             on { getBoard() } doReturn cells
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
         }
-
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
         useCase.setMove(3, 3, false)
-        verify(repository, times(1)).setMove(eq(2), eq(2), anyInt(), eq(false))
+        verify(repository, times(1)).setGoMove(any())
         verify(repository, times(1)).resetHint()
     }
 
@@ -765,10 +763,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckBlackByUpY() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 7)
             on { getPiece(2, 2) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 7, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isEvolution(3, 3)
         assertEquals(result, true)
@@ -783,10 +784,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckBlackByDownY() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 2)
             on { getPiece(2, 7) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, BLACK, 2, 7, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isEvolution(3, 8)
         assertEquals(result, true)
@@ -801,10 +805,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckBlackByStayY1() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(7, 2)
             on { getPiece(2, 2) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(7, 2, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isEvolution(3, 3)
         assertEquals(result, true)
@@ -819,10 +826,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckBlackByStayY2() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(7, 6)
             on { getPiece(2, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(7, 6, Piece.HISYA, BLACK, 2, 6, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isEvolution(3, 7)
         assertEquals(result, false)
@@ -837,10 +847,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckWhiteByUpY() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 2)
             on { getPiece(2, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, WHITE, 2, 6, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -858,10 +871,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckWhiteByDownY() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 7)
             on { getPiece(2, 2) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 7, Piece.HISYA, WHITE, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -879,10 +895,13 @@ class SyogiLogicUseCaseTest {
     fun evolutionCheckWhiteByStayY1() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 2)
             on { getPiece(7, 2) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, WHITE, 7, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -894,16 +913,19 @@ class SyogiLogicUseCaseTest {
     /**
      * 成り判定メソッド
      * 条件：後手番でコマが敵陣内で移動した時
-     * 結果：trueが返る
+     * 結果：trueを返す
      */
     @Test
     fun evolutionCheckWhiteByStayY2() {
         // テストクラス作成
         val repository = mock<BoardRepository> {
-            on { getBeforePieceCoordinate() } doReturn PieceMove(2, 6)
             on { getPiece(7, 6) } doReturn Piece.HISYA
         }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(2, 6, Piece.HISYA, WHITE, 7, 6, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -912,54 +934,189 @@ class SyogiLogicUseCaseTest {
         assertEquals(result, true)
     }
 
-
     /**
      * 強制でならないといけないか判定するメソッド
-     * 条件；強制でならないといけないようにする
-     * 結果：trueを返し、BoardRepositoryの成り判定メソッドが呼ばれる
+     * 条件；成れる条件で歩を動かす
+     * 結果：trueを返す
      */
     @Test
-    fun compulsionEvolutionCheckTrue() {
-        val repository = mock<BoardRepository> {
-            on { isCompulsionEvolution() } doReturn true
-        }
-
+    fun compulsionEvolutionCheckFU() {
+        val repository = mock<BoardRepository> { }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.FU, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isCompulsionEvolution()
         assertEquals(result, true)
-        verify(repository, times(1)).setEvolution()
+        verify(repository, times(1)).setEvolution(any())
     }
 
     /**
      * 強制でならないといけないか判定するメソッド
-     * 条件；成るか選択できるようにする
-     * 結果：trueを返し、BoardRepositoryの成り判定メソッドが呼ばれる
+     * 条件；成れる条件で桂馬を動かす
+     * 結果：falseを返す
      */
     @Test
-    fun compulsionEvolutionCheckFalse() {
-        val repository = mock<BoardRepository> {
-            on { isCompulsionEvolution() } doReturn false
-        }
-
+    fun compulsionEvolutionCheckKYO1() {
+        val repository = mock<BoardRepository> { }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.KYO, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
         val result = useCase.isCompulsionEvolution()
         assertEquals(result, false)
-        verify(repository, times(0)).setEvolution()
     }
 
     /**
-     * 成るメソッド
-     * 結果：BoardRepositoryの成りメソッドが呼ばれる
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で桂馬を動かす
+     * 結果：trueを返す
      */
     @Test
-    fun evolutionPiece() {
-        val repository = mock<BoardRepository> {}
+    fun compulsionEvolutionCheckKYO2() {
+        val repository = mock<BoardRepository> { }
         val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.KYO, BLACK, 2, 1, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
         // 実行
-        useCase.setEvolution()
-        verify(repository, times(1)).setEvolution()
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, true)
+    }
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で桂馬を動かす
+     * 結果：falseを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckKEI1() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.KEI, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, false)
+    }
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で桂馬を動かす
+     * 結果：trueを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckKEI2() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.KEI, BLACK, 2, 1, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, true)
+    }
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で銀を動かす
+     * 結果：falseを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckGIN() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.GIN, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, false)
+        verify(repository, times(0)).setEvolution(any())
+    }
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で金を動かす
+     * 結果：falseを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckKIN() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(6, 2, Piece.KIN, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, false)
+        verify(repository, times(0)).setEvolution(any())
+    }
+
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で飛車を動かす
+     * 結果：trueを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckHISYA() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(7, 2, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, true)
+    }
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で角を動かす
+     * 結果：trueを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckKAKU() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(7, 2, Piece.KAKU, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, true)
+    }
+
+
+    /**
+     * 強制でならないといけないか判定するメソッド
+     * 条件；成れる条件で王を動かす
+     * 結果：falseを返す
+     */
+    @Test
+    fun compulsionEvolutionCheckOU() {
+        val repository = mock<BoardRepository> { }
+        val useCase = SyogiLogicUseCaseImp(repository)
+        val log = mutableListOf(GameLog(7, 2, Piece.OU, BLACK, 2, 2, Piece.None, 0, false))
+        val logList: Field = useCase.javaClass.getDeclaredField("logList")
+        logList.isAccessible = true
+        logList.set(useCase, log)
+        // 実行
+        val result = useCase.isCompulsionEvolution()
+        assertEquals(result, false)
     }
 
     // endregion
@@ -1107,12 +1264,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isRepetitionMoveTrue() {
-        // テストクラス作成
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         val repository = mock<BoardRepository> {
             on { getBoard() } doReturn cells
+            on { getCellInformation(any(), any()) } doReturn cells[0][0]
         }
-
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
         useCase.setMove(3, 3, false)
@@ -1130,12 +1286,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isRepetitionMoveFalse() {
-        // テストクラス作成
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         val repository = mock<BoardRepository> {
             on { getBoard() } doReturn cells
+            on { getCellInformation(any(), any()) } doReturn cells[0][0]
         }
-
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
         useCase.setMove(3, 3, false)
@@ -1155,18 +1310,15 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isTryKingBlackTrue() {
-        // テストクラス作成
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[4][0].piece = Piece.OU
-        cells[4][0].turn = 1
+        cells[4][0].turn = BLACK
         val repository = mock<BoardRepository> {
             on { getBoard() } doReturn cells
-            on { getCellInformation(4, 0) } doReturn cells[4][0]
+            on { getCellInformation(any(), any()) } doReturn cells[4][0]
         }
-
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        useCase.setMove(3, 3, false)
         val result = useCase.isTryKing()
         assertEquals(result, true)
     }
@@ -1184,12 +1336,11 @@ class SyogiLogicUseCaseTest {
         cells[4][5].turn = 1
         val repository = mock<BoardRepository> {
             on { getBoard() } doReturn cells
-            on { getCellInformation(4, 0) } doReturn cells[4][0]
+            on { getCellInformation(any(), any()) } doReturn cells[4][0]
         }
 
         val useCase = SyogiLogicUseCaseImp(repository)
         // 実行
-        useCase.setMove(3, 3, false)
         val result = useCase.isTryKing()
         assertEquals(result, false)
     }

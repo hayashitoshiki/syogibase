@@ -3,6 +3,7 @@ package com.example.syogibase.domain
 import android.util.Log
 import com.example.syogibase.data.BoardRepository
 import com.example.syogibase.data.local.Cell
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.data.local.PieceMove
@@ -17,7 +18,12 @@ class SyogiLogicUseCaseImp(
 
     private var turn: Int = BLACK
 
+    private val logList = mutableListOf<GameLog>()
     private var positionList = mutableMapOf<String, Int>()
+    private var previousX: Int = 0
+    private var previousY: Int = 0
+    private var previousPiece: Piece = None
+    private var logIndex = 0
 
     // region アクション
 
@@ -45,9 +51,7 @@ class SyogiLogicUseCaseImp(
     // 駒を動かす
     override fun setMove(x: Int, y: Int, evolution: Boolean) {
         var position = ""
-        boardRepository.setMove(x - 1, y - 1, turn, evolution)
-        val log = boardRepository.getLogByIndex(boardRepository.getLogSize() - 1)
-        boardRepository.setHoldPiece(log)
+        setMove(x - 1, y - 1, turn, evolution)
         boardRepository.resetHint()
         boardRepository.getBoard().forEach {
             it.forEach { cell ->
@@ -59,7 +63,7 @@ class SyogiLogicUseCaseImp(
         } else {
             positionList[position] = 1
         }
-        logIndex = boardRepository.getLogSize() - 1
+        logIndex = logList.size - 1
     }
 
     // 持ち駒を使う場合
@@ -73,7 +77,6 @@ class SyogiLogicUseCaseImp(
             }
         if (piece == None) return
 
-        boardRepository.setPre(x, y)
         when (piece) {
             GIN, KIN, HISYA, KAKU ->
                 for (i in 0..8) {
@@ -165,12 +168,14 @@ class SyogiLogicUseCaseImp(
 
     // ヒントを設定する
     private fun setHint(x: Int, y: Int, newX: Int, newY: Int, turn: Int) {
-        boardRepository.setPre(x, y)
-        boardRepository.setMove(newX, newY, turn, false)
+        setPre(x, y)
+        setMove(newX, newY, turn, false)
+        val log: GameLog = logList.last()
         val (kingX: Int, kingY: Int) = boardRepository.findKing(turn)
         if (!isCheck(kingX, kingY, turn))
             boardRepository.setHint(newX, newY)
-        boardRepository.setPreBackMove()
+        boardRepository.setBackMove(log)
+        logList.remove(log)
     }
 
     // キャンセル
@@ -424,45 +429,58 @@ class SyogiLogicUseCaseImp(
         newY: Int,
         turn: Int
     ): Boolean {
-        boardRepository.setPre(x, y)
-        boardRepository.setMove(newX, newY, turn, false)
+        setPre(x, y)
+        setMove(newX, newY, turn, false)
+        val log: GameLog = logList.last()
         val result = isCheckmate()
-        boardRepository.setPreBackMove()
+        boardRepository.setBackMove(log)
+        logList.remove(log)
         return result
     }
 
     // 成り判定
     override fun isEvolution(x: Int, y: Int): Boolean {
-        val before = boardRepository.getBeforePieceCoordinate()
+        val before = PieceMove(logList.last().oldX, logList.last().oldY)
         return (before.y + 1 in 1..9 && boardRepository.getPiece(x - 1, y - 1)
             .findEvolution()) && ((turn == BLACK && (y <= 3 || before.y + 1 <= 3)) || (turn == WHITE && (7 <= y || 7 <= before.y + 1)))
     }
 
     // 成り判定 強制か否か
     override fun isCompulsionEvolution(): Boolean {
-        if (boardRepository.isCompulsionEvolution()) {
-            setEvolution()
-            return true
+        val log: GameLog = logList.last()
+        return when (log.afterPiece) {
+            FU, HISYA, KAKU -> {
+                setEvolution()
+                true
+            }
+            KYO, KEI -> {
+                if ((log.newY <= 1 && log.afterTurn == BLACK) || (7 <= log.newY && log.afterTurn == WHITE)) {
+                    setEvolution()
+                    true
+                } else {
+                    false
+                }
+            }
+            else -> false
         }
-        return false
     }
 
     // 成り
     override fun setEvolution() {
-        boardRepository.setEvolution()
+        val log: GameLog = logList.last()
+        logList.last().evolution = true
+        boardRepository.setEvolution(log)
     }
 
     // endregion
 
     // region 棋譜保存
 
-    private var logIndex = 0
-
     // 一手進む
     override fun setGoMove() {
-        if (logIndex < (boardRepository.getLogSize() - 1)) {
+        if (logIndex < (logList.size - 1)) {
             logIndex += 1
-            val log = boardRepository.getLogByIndex(logIndex)
+            val log = logList[logIndex]
             boardRepository.setGoMove(log)
         }
     }
@@ -470,24 +488,53 @@ class SyogiLogicUseCaseImp(
     // 一手戻す
     override fun setBackMove() {
         if (0 <= logIndex) {
-            val log = boardRepository.getLogByIndex(logIndex)
+            val log = logList[logIndex]
             boardRepository.setBackMove(log)
             logIndex -= 1
         }
     }
 
-    // 最初まで戻る
-    override fun setBackFirstMove() {
-        while (logIndex < (boardRepository.getLogSize() - 1)) {
+    // 最後まで進む
+    override fun setGoLastMove() {
+        while (logIndex < (logList.size - 1)) {
             setGoMove()
         }
     }
 
-    // 最後まで進む
-    override fun setGoLastMove() {
+    // 最初まで戻る
+    override fun setBackFirstMove() {
         while (0 <= logIndex) {
             setBackMove()
         }
+    }
+
+    // 動かす前の駒の状態をセット
+    private fun setPre(x: Int, y: Int) {
+        previousX = x
+        previousY = y
+        previousPiece =
+            when (y) {
+                BLACK_HOLD, WHITE_HOLD -> boardRepository.changeIntToPiece(x)
+                else -> boardRepository.getCellInformation(previousX, previousY).piece
+            }
+    }
+
+    // 駒を動かす
+    private fun setMove(x: Int, y: Int, turn: Int, evolution: Boolean) {
+        val newCell = boardRepository.getCellInformation(x, y)
+        val gameLog = GameLog(
+            previousX,
+            previousY,
+            previousPiece,
+            turn,
+            x,
+            y,
+            newCell.piece,
+            newCell.turn,
+            evolution
+        )
+        logList.add(gameLog)
+        boardRepository.setGoMove(gameLog)
     }
 
 
