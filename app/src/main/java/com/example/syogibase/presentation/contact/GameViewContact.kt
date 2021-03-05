@@ -1,5 +1,7 @@
 package com.example.syogibase.presentation.contact
 
+import com.example.syogibase.util.Handicap
+
 interface GameViewContact {
 
     interface View {
@@ -49,5 +51,11 @@ interface GameViewContact {
 
         // １手戻る
         fun setBackMove()
+
+        // リセットする
+        fun reset()
+
+        // 駒落ち設定
+        fun setHandicap(turn: Int, handicap: Handicap)
     }
 }

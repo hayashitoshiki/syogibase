@@ -6,10 +6,7 @@ import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.data.local.Piece.*
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.BLACK_HOLD
-import com.example.syogibase.util.WHITE
-import com.example.syogibase.util.WHITE_HOLD
+import com.example.syogibase.util.*
 
 
 class BoardRepositoryImp : BoardRepository {
@@ -19,6 +16,13 @@ class BoardRepositoryImp : BoardRepository {
     // カスタム初期値設定
     override fun setBoard(customBoard: Array<Array<Cell>>) {
         board.setBoard(customBoard)
+    }
+
+    // 盤面を初期化する
+    override fun resetBoard() {
+        board.setBoard(Board().cells)
+        board.holdPieceBlack.mapValues { 0 }
+        board.holdPieceWhite.mapValues { 0 }
     }
 
     // region マスの情報取得
@@ -61,7 +65,7 @@ class BoardRepositoryImp : BoardRepository {
     // region マスの情報更新
 
     // 駒落ち設定
-    override fun setHandicap(turn: Int, handicap: Int) {
+    override fun setHandicap(turn: Int, handicap: Handicap) {
         board.setHandicap(turn, handicap)
     }
 
@@ -80,21 +84,22 @@ class BoardRepositoryImp : BoardRepository {
                 board.cells[log.oldX][log.oldY].turn = 0
             }
         }
-        //
-        setHoldPiece(log)
+        val piece = log.beforpiece.degeneration()
+        if (board.holdPieceBlack.keys.contains(piece)) {
+            when (log.beforturn) {
+                BLACK -> board.holdPieceWhite[piece] = board.holdPieceWhite[piece]!! + 1
+                WHITE -> board.holdPieceBlack[piece] = board.holdPieceBlack[piece]!! + 1
+            }
+        }
     }
-
 
     // １手戻す
     override fun setBackMove(log: GameLog) {
-        when (log.beforturn) {
-            BLACK -> {
-                val piece = log.beforpiece.degeneration()
-                board.holdPieceWhite[piece] = board.holdPieceWhite[piece]!! - 1
-            }
-            WHITE -> {
-                val piece = log.beforpiece.degeneration()
-                board.holdPieceBlack[piece] = board.holdPieceBlack[piece]!! - 1
+        val piece = log.beforpiece.degeneration()
+        if (board.holdPieceBlack.keys.contains(piece)) {
+            when (log.beforturn) {
+                BLACK -> board.holdPieceWhite[piece] = board.holdPieceWhite[piece]!! - 1
+                WHITE -> board.holdPieceBlack[piece] = board.holdPieceBlack[piece]!! - 1
             }
         }
         when (log.oldY) {
@@ -121,12 +126,10 @@ class BoardRepositoryImp : BoardRepository {
         board.cells.forEach { it.forEach { it.hint = false } }
     }
 
-
     //成る
     override fun setEvolution(log: GameLog) {
         board.cells[log.newX][log.newY].piece = log.afterPiece.evolution()
     }
-
 
     // endregion
 
@@ -157,15 +160,6 @@ class BoardRepositoryImp : BoardRepository {
         ) return None
 
         return changeIntToPiece(i)
-    }
-
-    //持ち駒追加
-    private fun setHoldPiece(log: GameLog) {
-        val piece = log.beforpiece.degeneration()
-        when (log.beforturn) {
-            BLACK -> board.holdPieceWhite[piece] = board.holdPieceWhite[piece]!! + 1
-            WHITE -> board.holdPieceBlack[piece] = board.holdPieceBlack[piece]!! + 1
-        }
     }
 
     //持ち駒台の座標から駒を取得(本当はよくない)

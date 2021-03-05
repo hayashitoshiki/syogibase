@@ -4,6 +4,7 @@ package com.example.syogibase.data.local
 
 import com.example.syogibase.data.local.Piece.*
 import com.example.syogibase.util.BLACK
+import com.example.syogibase.util.Handicap
 import com.example.syogibase.util.WHITE
 
 class Board {
@@ -17,7 +18,7 @@ class Board {
     // ９×９の将棋盤
     val cells = Array(COLS) { Array(ROWS) { Cell() } }
 
-    // 持ち駒　名前　数
+    // 先手の持ち駒
     val holdPieceBlack = mutableMapOf(
         FU to 0,
         KYO to 0,
@@ -28,6 +29,7 @@ class Board {
         HISYA to 0
     )
 
+    // 後手の持ち駒
     val holdPieceWhite = mutableMapOf(
         FU to 0,
         KYO to 0,
@@ -107,62 +109,70 @@ class Board {
     }
 
     // 駒落ちセット
-    fun setHandicap(turn: Int, handicap: Int) {
+    fun setHandicap(turn: Int, handicap: Handicap) {
         when (turn) {
             BLACK -> {
-                if (handicap >= 8) {
+                if (handicap == Handicap.HATIMAI) {
                     cells[2][ROWS - 1].piece = None
                     cells[2][ROWS - 1].turn = 0
                     cells[6][ROWS - 1].piece = None
                     cells[6][ROWS - 1].turn = 0
                 }
-                if (handicap >= 7) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI) {
                     cells[1][ROWS - 1].piece = None
                     cells[1][ROWS - 1].turn = 0
                     cells[7][ROWS - 1].piece = None
                     cells[7][ROWS - 1].turn = 0
                 }
-                if (handicap >= 6) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI) {
                     cells[0][ROWS - 1].piece = None
                     cells[0][ROWS - 1].turn = 0
                     cells[8][ROWS - 1].piece = None
                     cells[8][ROWS - 1].turn = 0
                 }
-                if (handicap >= 4) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI || handicap == Handicap.NIMAI || handicap == Handicap.KAKU) {
                     cells[7][(ROWS - 1) - 1].piece = None
                     cells[7][(ROWS - 1) - 1].turn = 0
                 }
-                if (handicap == 3 || handicap >= 5) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI || handicap == Handicap.NIMAI || handicap == Handicap.HISYA) {
                     cells[1][(ROWS - 1) - 1].piece = None
                     cells[1][(ROWS - 1) - 1].turn = 0
                 }
+                if (handicap == Handicap.HIDARIKYO) {
+                    cells[8][(ROWS - 1) - 1].piece = None
+                    cells[8][(ROWS - 1) - 1].turn = 0
+                }
             }
             WHITE -> {
-                if (handicap >= 8) {
+                if (handicap == Handicap.HATIMAI) {
                     cells[2][0].piece = None
                     cells[2][0].turn = 0
                     cells[6][0].piece = None
                     cells[6][0].turn = 0
                 }
-                if (handicap >= 7) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI) {
                     cells[1][0].piece = None
                     cells[1][0].turn = 0
                     cells[7][0].piece = None
                     cells[7][0].turn = 0
                 }
-                if (handicap >= 6) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI) {
                     cells[0][0].piece = None
                     cells[0][0].turn = 0
                     cells[8][0].piece = None
                     cells[8][0].turn = 0
                 }
-                if (handicap >= 4) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI || handicap == Handicap.NIMAI || handicap == Handicap.KAKU) {
                     cells[1][1].piece = None
                     cells[1][1].turn = 0
                 }
-                if (handicap == 3 || handicap >= 5) {
+                if (handicap == Handicap.HATIMAI || handicap == Handicap.ROKUMAI || handicap == Handicap.YONMAI || handicap == Handicap.NIMAI || handicap == Handicap.HISYA) {
                     cells[7][1].piece = None
                     cells[7][1].turn = 0
+                }
+                if (handicap == Handicap.HIDARIKYO) {
+                    cells[0][0].piece = None
+                    cells[0][0].turn = 0
                 }
             }
         }

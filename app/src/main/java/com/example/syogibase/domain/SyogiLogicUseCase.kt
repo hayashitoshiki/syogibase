@@ -2,6 +2,7 @@ package com.example.syogibase.domain
 
 import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.Piece
+import com.example.syogibase.util.Handicap
 
 interface SyogiLogicUseCase {
 
@@ -11,7 +12,7 @@ interface SyogiLogicUseCase {
     fun getTurn(): Int
 
     // 駒落ち設定
-    fun setHandicap(turn: Int, handicap: Int)
+    fun setHandicap(turn: Int, handicap: Handicap)
 
     // 指定した盤面設定
     fun setBoard(customBoard: Array<Array<Cell>>)
@@ -79,6 +80,8 @@ interface SyogiLogicUseCase {
     // 最後まで進む
     fun setGoLastMove()
 
+    // リセットする
+    fun reset()
 
     // endregion
 }

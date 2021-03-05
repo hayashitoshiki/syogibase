@@ -36,7 +36,7 @@ class GameLogicPresenter(
         }
     }
 
-    // タッチ判定
+    // 対局モード
     override fun onTouchEvent(touchX: Int, touchY: Int) {
         // 持ち駒
         if (touchY == 0 || touchY == 10) {
@@ -101,12 +101,17 @@ class GameLogicPresenter(
         useCase.setGoLastMove()
     }
 
-    // 対局モード
-
-    // 通信対戦モード
-
     // 成り判定
     override fun evolutionPiece() {
         useCase.setEvolution()
+    }
+
+    // リセット
+    override fun reset() {
+        useCase.reset()
+    }
+
+    override fun setHandicap(turn: Int, handicap: Handicap) {
+        useCase.setHandicap(turn, handicap)
     }
 }

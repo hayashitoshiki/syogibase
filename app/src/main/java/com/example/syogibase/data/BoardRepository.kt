@@ -3,6 +3,7 @@ package com.example.syogibase.data
 import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
+import com.example.syogibase.util.Handicap
 
 
 interface BoardRepository {
@@ -11,6 +12,9 @@ interface BoardRepository {
 
     // 局面を取得
     fun getBoard(): Array<Array<Cell>>
+
+    // 盤面を初期化する
+    fun resetBoard()
 
     // 指定したマスの情報を返す
     fun getCellInformation(x: Int, y: Int): Cell
@@ -35,7 +39,7 @@ interface BoardRepository {
     // region マスの情報更新
 
     // 駒落ち設定
-    fun setHandicap(turn: Int, handicap: Int)
+    fun setHandicap(turn: Int, handicap: Handicap)
 
     // 指定した盤面を設定する
     fun setBoard(customBoard: Array<Array<Cell>>)

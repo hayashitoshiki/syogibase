@@ -2,15 +2,9 @@ package com.example.syogibase.domain
 
 import android.util.Log
 import com.example.syogibase.data.BoardRepository
-import com.example.syogibase.data.local.Cell
-import com.example.syogibase.data.local.GameLog
-import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.local.*
 import com.example.syogibase.data.local.Piece.*
-import com.example.syogibase.data.local.PieceMove
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.BLACK_HOLD
-import com.example.syogibase.util.WHITE
-import com.example.syogibase.util.WHITE_HOLD
+import com.example.syogibase.util.*
 
 class SyogiLogicUseCaseImp(
     private val boardRepository: BoardRepository
@@ -33,7 +27,7 @@ class SyogiLogicUseCaseImp(
     }
 
     // 駒落ち設定
-    override fun setHandicap(turn: Int, handicap: Int) {
+    override fun setHandicap(turn: Int, handicap: Handicap) {
         boardRepository.setHandicap(turn, handicap)
     }
 
@@ -535,6 +529,13 @@ class SyogiLogicUseCaseImp(
         )
         logList.add(gameLog)
         boardRepository.setGoMove(gameLog)
+    }
+
+    // リセットする
+    override fun reset() {
+        turn = BLACK
+        logList.removeAll(logList)
+        boardRepository.setBoard(Board().cells)
     }
 
 

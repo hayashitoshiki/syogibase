@@ -7,8 +7,11 @@ import android.os.Handler
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
+import com.example.syogibase.data.local.Board.Companion.COLS
+import com.example.syogibase.data.local.Board.Companion.ROWS
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
+import com.example.syogibase.util.Handicap
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
@@ -32,21 +35,28 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
     private lateinit var canvas: Canvas
     private val paint: Paint = Paint()
 
+    // 将棋盤の幅
     private val bw: Float = if (width < height) {
         width.toFloat()
     } else {
         height.toFloat()
-    }//将棋盤の幅
+    }
+
+    // 将棋盤の高さ
     private val bh: Float = if (width < height) {
         width.toFloat()
     } else {
         height.toFloat()
-    }//将棋盤の高さ
-    private val cw: Float = bw / 9//１マスの幅
-    private val ch: Float = bh / 9//１マスの高さ
+    }
+
+    // １マスの幅
+    private val cw: Float = bw / COLS
+
+    // １マスの高さ
+    private val ch: Float = bh / ROWS
     private val median = 2 //盤の位置　中央値：３ 範囲：０～６
 
-    //onCreat
+    // onCreat
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         this.canvas = canvas
@@ -54,7 +64,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         presenter.drawView()
     }
 
-    //指した時の動作
+    // 指した時の動作
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val c = (event.x / cw).toInt()
         val r = (event.y / ch - median).toInt()
@@ -62,15 +72,9 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         when (mode) {
             BoardMode.GAME -> {
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                    }
                     MotionEvent.ACTION_UP -> {
                         presenter.onTouchEvent(c, r)
                         invalidate()
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                    }
-                    MotionEvent.ACTION_CANCEL -> {
                     }
                 }
             }
@@ -94,10 +98,6 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
                         }
                         invalidate()
                     }
-                    MotionEvent.ACTION_MOVE -> {
-                    }
-                    MotionEvent.ACTION_CANCEL -> {
-                    }
                 }
             }
         }
@@ -105,7 +105,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         return true
     }
 
-    //将棋盤描画
+    // 将棋盤描画
     override fun drawBoard() {
         //盤面セット
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.free_grain_sub)
@@ -129,7 +129,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         for (i in 0 until 10) canvas.drawLine(0f, ch * (i + 1), bw, ch * (i + 1), paint)
     }
 
-    //後手の駒描画
+    // 後手の駒描画
     override fun drawWhitePiece(name: String, i: Int, j: Int) {
         paint.textSize = cw / 2
         canvas.save()
@@ -138,13 +138,13 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         canvas.restore()
     }
 
-    //先手の駒描画
+    // 先手の駒描画
     override fun drawBlackPiece(name: String, i: Int, j: Int) {
         paint.textSize = cw / 2
         canvas.drawText(name, (cw * i) + cw / 5, ch * 2 + (ch * j) - cw / 4, paint)
     }
 
-    //先手の持ち駒描画
+    // 先手の持ち駒描画
     override fun drawHoldPieceBlack(nameJP: String, stock: Int, count: Int) {
         paint.textSize = cw / 2
         canvas.drawText(nameJP, (cw * (count + 2)) + cw / 5, ch * 2 + (ch * 9) - cw / 4, paint)
@@ -157,7 +157,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         )
     }
 
-    //後手の持ち駒描画
+    // 後手の持ち駒描画
     override fun drawHoldPieceWhite(nameJP: String, stock: Int, count: Int) {
         canvas.save()
         canvas.rotate(180f, cw * (7 - count), ch - cw / 2)
@@ -169,7 +169,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
 
     }
 
-    //ヒント描画メソッド
+    // ヒント描画メソッド
     override fun drawHint(x: Int, y: Int) {
         paint.color = (Color.argb(200, 255, 255, 0))
         canvas.drawCircle(
@@ -181,7 +181,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         paint.color = Color.rgb(40, 40, 40)
     }
 
-    //成り判定ダイアログ
+    // 成り判定ダイアログ
     override fun showDialog() {
         val alertBuilder = AlertDialog.Builder(context).setCancelable(false)
         alertBuilder.setMessage("成りますか？")
@@ -195,10 +195,33 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         alertBuilder.create().show()
     }
 
-    //終了ダイアログ表示
+    // 終了ダイアログ表示
     override fun gameEnd(turn: Int) {
-        mode = BoardMode.REPLAY
-        activity.gameEnd(turn)
+        AlertDialog.Builder(context)
+            .setTitle("終了")
+            .setMessage("勝ち")
+            .setPositiveButton("終了") { dialog, which ->
+                activity.finish()
+            }
+            .setNeutralButton("もう一度") { dialog, which ->
+                presenter.reset()
+            }
+            .setNegativeButton("感想戦") { dialog, which ->
+                setBoardMove(BoardMode.REPLAY)
+            }
+            .show()
+//        mode = BoardMode.REPLAY
+//        activity.gameEnd(turn)
+    }
+
+    // Viewのモード設定
+    fun setBoardMove(mode: BoardMode) {
+        this.mode = mode
+    }
+
+    // ハンデ設定
+    fun setHandicap(turn: Int, handicap: Handicap) {
+        presenter.setHandicap(turn, handicap)
     }
 
 }
