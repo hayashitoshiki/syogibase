@@ -4,11 +4,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
 import android.os.Handler
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
 import com.example.syogibase.data.local.Board.Companion.COLS
-import com.example.syogibase.data.local.Board.Companion.ROWS
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
@@ -17,11 +17,17 @@ import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
 
 
-class GameView(private val activity: GameActivity, context: Context, width: Int, height: Int) :
-    View(context), GameViewContact.View,
+class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
+    View(context, attrs, defStyleAttr), GameViewContact.View,
     KoinComponent {
+    constructor(context: Context?) : this(context, null) {}
+    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0) {}
 
-    // ゲームモード
+    // region 変数
+
+    private val presenter: GameViewContact.Presenter by inject { parametersOf(this) }
+    private lateinit var canvas: Canvas
+
     private var mode: BoardMode = BoardMode.GAME
     private val longPressHandler = Handler()
     private val longPressBack = Runnable {
@@ -31,49 +37,57 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
         presenter.setBackFirstMove()
     }
 
-    private val presenter: GameViewContact.Presenter by inject { parametersOf(this) }
-    private lateinit var canvas: Canvas
-    private val paint: Paint = Paint()
+    private var cellWidth: Float = 0f
+    private var cellHeight: Float = 0f
+    private val boardWidth: Float
+        get() = cellWidth * COLS
+    private val boardHeight: Float
+        get() = cellHeight * COLS
+    private val horizontalStandSpace: Float
+        get() = if (width < height) {
+            0f
+        } else {
+            cellWidth
+        }
+    private val verticalStandSpace: Float
+        get() = if (width < height) {
+            cellHeight
+        } else {
+            0f
+        }
 
-    // 将棋盤の幅
-    private val bw: Float = if (width < height) {
-        width.toFloat()
-    } else {
-        height.toFloat()
+    // endregion
+
+    // region ライフサイクル
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = MeasureSpec.getSize(heightMeasureSpec)
+        presenter.computeCellSize(width, height)
+        invalidate()
     }
 
-    // 将棋盤の高さ
-    private val bh: Float = if (width < height) {
-        width.toFloat()
-    } else {
-        height.toFloat()
-    }
-
-    // １マスの幅
-    private val cw: Float = bw / COLS
-
-    // １マスの高さ
-    private val ch: Float = bh / ROWS
-    private val median = 2 //盤の位置　中央値：３ 範囲：０～６
-
-    // onCreat
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         this.canvas = canvas
-        canvas.translate(0f, cw * median)
+        val boardStartX = (width - (boardWidth + horizontalStandSpace * 2)) / 2
+        val boardStartY = (height - (boardHeight + verticalStandSpace * 2)) / 2
+        this.canvas.translate(boardStartX, boardStartY)
         presenter.drawView()
     }
 
-    // 指した時の動作
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val c = (event.x / cw).toInt()
-        val r = (event.y / ch - median).toInt()
+        val boardStartX = (width - (boardWidth + horizontalStandSpace * 2)) / 2
+        val boardStartY = (height - (boardHeight + verticalStandSpace * 2)) / 2
+        val x = (((event.x - boardStartX) / cellWidth)).toInt()
+        val y = (((event.y - boardStartY) / cellHeight)).toInt()
 
         when (mode) {
             BoardMode.GAME -> {
                 when (event.action) {
                     MotionEvent.ACTION_UP -> {
-                        presenter.onTouchEvent(c, r)
+                        presenter.onTouchEvent(x, y)
                         invalidate()
                     }
                 }
@@ -81,18 +95,18 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
             BoardMode.REPLAY -> {
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
-                        if (c in 4..8) {
+                        if (x in 4..8) {
                             longPressHandler.postDelayed(longPressGo, 800)
-                        } else if (c in 0..4) {
+                        } else if (x in 0..4) {
                             longPressHandler.postDelayed(longPressBack, 800)
                         }
                     }
                     MotionEvent.ACTION_UP -> {
                         // TODO　後で絶対修正！！！
-                        if (c in 4..8) {
+                        if (x in 4..8) {
                             presenter.setGoMove()
                             longPressHandler.removeCallbacks(longPressGo)
-                        } else if (c in 0..4) {
+                        } else if (x in 0..4) {
                             presenter.setBackMove()
                             longPressHandler.removeCallbacks(longPressBack)
                         }
@@ -101,85 +115,148 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
                 }
             }
         }
-
         return true
     }
+    // endregion
+
+    // region 描画
 
     // 将棋盤描画
     override fun drawBoard() {
-        //盤面セット
+        // 盤面セット
+        val paint = Paint()
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.free_grain_sub)
-        val rect1 = Rect(0, 0, bw.toInt(), bh.toInt())
-        val rect2 = Rect(0, ch.toInt(), bw.toInt() + bw.toInt(), bh.toInt() + cw.toInt())
+        val rect1 = Rect(0, 0, bmp.width, bmp.height)
+        val boardStartX = horizontalStandSpace.toInt()
+        val boardStartY = verticalStandSpace.toInt()
+        val boardEndX = boardWidth.toInt() + horizontalStandSpace.toInt()
+        val boardEndY = boardHeight.toInt() + verticalStandSpace.toInt()
+        val rect2 = Rect(boardStartX, boardStartY, boardEndX, boardEndY)
         canvas.drawBitmap(bmp, rect1, rect2, paint)
-        //駒台セット
-        paint.color = Color.rgb(251, 171, 83)
-        canvas.drawRect(cw * 2, bw + cw, bw, bh + cw * 2.toFloat(), paint)
-        canvas.drawRect(0f, 0f, bw - cw * 2.toFloat(), cw, paint)
-        //罫線セット
+
+        // 罫線セット
         paint.color = Color.rgb(40, 40, 40)
         paint.strokeWidth = 2f
-        for (i in 0 until 9) canvas.drawLine(
-            cw * (i + 1).toFloat(),
-            cw,
-            cw * (i + 1).toFloat(),
-            bh + cw,
-            paint
-        )
-        for (i in 0 until 10) canvas.drawLine(0f, ch * (i + 1), bw, ch * (i + 1), paint)
+        for (i in 0 until 10) {
+            val linePositionX = cellWidth * i + horizontalStandSpace
+            val lineStartY = verticalStandSpace
+            val lineEndY = boardHeight + verticalStandSpace
+            canvas.drawLine(linePositionX, lineStartY, linePositionX, lineEndY, paint)
+        }
+        for (i in 0 until 10) {
+            val linePositionY = cellHeight * i + verticalStandSpace
+            val lineStartX = horizontalStandSpace
+            val lineEndX = boardWidth + horizontalStandSpace
+            canvas.drawLine(lineStartX, linePositionY, lineEndX, linePositionY, paint)
+        }
     }
 
-    // 後手の駒描画
-    override fun drawWhitePiece(name: String, i: Int, j: Int) {
-        paint.textSize = cw / 2
-        canvas.save()
-        canvas.rotate(180f, (cw * i) + cw / 2, ch * 2 + (ch * j) - cw / 2)
-        canvas.drawText(name, (cw * i) + cw / 5, ch * 2 + (ch * j) - cw / 4, paint)
-        canvas.restore()
+    // 盤面の上下に駒台描画
+    override fun drawHorizontalStand() {
+        val paint = Paint()
+        paint.color = Color.rgb(251, 171, 83)
+        val whiteStandStartX = 0f
+        val whiteStandStartY = 0f
+        val whiteStandEndX = boardWidth - cellWidth * 2
+        val whiteStandEndY = verticalStandSpace
+        canvas.drawRect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY, paint)
+        val blackStandStartX = cellWidth * 2
+        val blackStandStartY = boardHeight + verticalStandSpace
+        val blackStandEndX = boardWidth
+        val blackStandEndY = boardHeight + verticalStandSpace * 2
+        canvas.drawRect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY, paint)
+    }
+
+    // 盤面の左右に駒台描画
+    override fun drawVerticalStand() {
+        val paint = Paint()
+        paint.color = Color.rgb(251, 171, 83)
+        val whiteStandStartX = 0f
+        val whiteStandStartY = 0f
+        val whiteStandEndX = horizontalStandSpace
+        val whiteStandEndY = boardHeight - cellHeight * 2
+        canvas.drawRect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY, paint)
+        val blackStandStartX = boardHeight + horizontalStandSpace
+        val blackStandStartY = cellHeight * 2
+        val blackStandEndX = boardWidth + horizontalStandSpace * 2
+        val blackStandEndY = boardHeight
+        canvas.drawRect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY, paint)
     }
 
     // 先手の駒描画
-    override fun drawBlackPiece(name: String, i: Int, j: Int) {
-        paint.textSize = cw / 2
-        canvas.drawText(name, (cw * i) + cw / 5, ch * 2 + (ch * j) - cw / 4, paint)
+    override fun drawBlackPiece(name: String, x: Int, y: Int) {
+        val newX = x + (horizontalStandSpace / cellWidth).toInt()
+        val newY = y + (verticalStandSpace / cellHeight).toInt()
+        drawPiece(name, newX, newY)
+    }
+
+    // 後手の駒描画
+    override fun drawWhitePiece(name: String, x: Int, y: Int) {
+        val cellCenterX = horizontalStandSpace + (cellWidth * x) + cellWidth / 2
+        val cellCenterY = verticalStandSpace + (cellHeight * y) + cellWidth / 2
+        canvas.save()
+        canvas.rotate(180f, cellCenterX, cellCenterY)
+        val newX = x + (horizontalStandSpace / cellWidth).toInt()
+        val newY = y + (verticalStandSpace / cellHeight).toInt()
+        drawPiece(name, newX, newY)
+        canvas.restore()
     }
 
     // 先手の持ち駒描画
-    override fun drawHoldPieceBlack(nameJP: String, stock: Int, count: Int) {
-        paint.textSize = cw / 2
-        canvas.drawText(nameJP, (cw * (count + 2)) + cw / 5, ch * 2 + (ch * 9) - cw / 4, paint)
-        paint.textSize = cw / 5
-        canvas.drawText(
-            stock.toString(),
-            (cw * (count + 2)) + cw * 3 / 4,
-            ch * 2 + (ch * 9) - cw / 8,
-            paint
-        )
+    override fun drawHoldPieceBlack(name: String, stock: Int, x: Int, y: Int) {
+        drawPiece(name, x, y)
+        drawCount(stock.toString(), x, y)
     }
 
     // 後手の持ち駒描画
-    override fun drawHoldPieceWhite(nameJP: String, stock: Int, count: Int) {
+    override fun drawHoldPieceWhite(name: String, stock: Int, x: Int, y: Int) {
+        val cellCenterX = (cellWidth * x) + cellWidth / 2
+        val cellCenterY = (cellHeight * y) + cellHeight / 2
         canvas.save()
-        canvas.rotate(180f, cw * (7 - count), ch - cw / 2)
-        paint.textSize = cw / 2
-        canvas.drawText(nameJP, (cw * (7 - count)) + cw / 5, ch - cw / 4, paint)
-        paint.textSize = cw / 5
-        canvas.drawText(stock.toString(), (cw * (7 - count)) + cw * 3 / 4, ch - cw / 8, paint)
+        canvas.rotate(180f, cellCenterX, cellCenterY)
+        drawPiece(name, x, y)
+        drawCount(stock.toString(), x, y)
         canvas.restore()
+    }
 
+    // コマ描画
+    private fun drawPiece(name: String, x: Int, y: Int) {
+        val paint = Paint()
+        paint.textSize = cellWidth / 2
+        paint.color = Color.rgb(40, 40, 40)
+        val textWidth = paint.measureText(name)
+        val textCenter = textWidth / 2
+        val cellCenterX = cellWidth * x + cellWidth / 2 - textCenter
+        val cellCenterY = cellHeight * y + cellHeight / 2 - ((paint.descent() + paint.ascent()) / 2)
+        canvas.drawText(name, cellCenterX, cellCenterY, paint)
+    }
+
+    // コマのカウント描画
+    private fun drawCount(count: String, x: Int, y: Int) {
+        val paint = Paint()
+        paint.textSize = cellWidth / 5
+        paint.color = Color.rgb(40, 40, 40)
+        val textWidth = paint.measureText(count)
+        val textCenter = textWidth / 2
+        val cellCenterX = cellWidth * x + cellWidth / 4 * 3 + textCenter
+        val cellCenterY =
+            cellHeight * y + cellHeight / 4 * 3 - ((paint.descent() + paint.ascent()) / 2)
+        canvas.drawText(count, cellCenterX, cellCenterY, paint)
     }
 
     // ヒント描画メソッド
     override fun drawHint(x: Int, y: Int) {
+        val paint = Paint()
         paint.color = (Color.argb(200, 255, 255, 0))
-        canvas.drawCircle(
-            (cw * x + cw / 2),
-            (ch * (y + 1) + ch / 2),
-            (bw / 9 * 0.46).toFloat(),
-            paint
-        )
-        paint.color = Color.rgb(40, 40, 40)
+        val centerX = cellWidth * (x + (horizontalStandSpace / cellWidth).toInt()) + cellWidth / 2
+        val centerY = cellHeight * (y + (verticalStandSpace / cellHeight).toInt()) + cellHeight / 2
+        val radius = (cellWidth * 0.46).toFloat()
+        canvas.drawCircle(centerX, centerY, radius, paint)
     }
+
+    // endregion
+
+    // region ダイアログ
 
     // 成り判定ダイアログ
     override fun showDialog() {
@@ -201,7 +278,8 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
             .setTitle("終了")
             .setMessage("勝ち")
             .setPositiveButton("終了") { dialog, which ->
-                activity.finish()
+                //activity.finish()
+                setBoardMove(BoardMode.REPLAY)
             }
             .setNeutralButton("もう一度") { dialog, which ->
                 presenter.reset()
@@ -210,8 +288,14 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
                 setBoardMove(BoardMode.REPLAY)
             }
             .show()
-//        mode = BoardMode.REPLAY
-//        activity.gameEnd(turn)
+    }
+
+    // region 設定
+
+    // マスのサイズ設定
+    override fun setCellSize(size: Float) {
+        cellWidth = size
+        cellHeight = size
     }
 
     // Viewのモード設定
@@ -223,5 +307,7 @@ class GameView(private val activity: GameActivity, context: Context, width: Int,
     fun setHandicap(turn: Int, handicap: Handicap) {
         presenter.setHandicap(turn, handicap)
     }
+
+    // endregion
 
 }

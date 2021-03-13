@@ -5,23 +5,32 @@ import com.example.syogibase.util.Handicap
 interface GameViewContact {
 
     interface View {
+        // マスのサイズ設定
+        fun setCellSize(size: Float)
+
         // 将棋盤描画
         fun drawBoard()
 
+        // 垂直方向の駒台描画
+        fun drawHorizontalStand()
+
+        // 水平方向の駒台描画
+        fun drawVerticalStand()
+
         // 先手の駒描画
-        fun drawBlackPiece(name: String, i: Int, j: Int)
+        fun drawBlackPiece(name: String, x: Int, y: Int)
 
         //後手の駒描画
-        fun drawWhitePiece(name: String, i: Int, j: Int)
+        fun drawWhitePiece(name: String, x: Int, y: Int)
 
         // ヒント描画
         fun drawHint(x: Int, y: Int)
 
         // 先手の持ち駒描画
-        fun drawHoldPieceBlack(nameJP: String, stock: Int, count: Int)
+        fun drawHoldPieceBlack(name: String, stock: Int, x: Int, y: Int)
 
         // 後手の持ち駒描画
-        fun drawHoldPieceWhite(nameJP: String, stock: Int, count: Int)
+        fun drawHoldPieceWhite(name: String, stock: Int, x: Int, y: Int)
 
         // 成るか判断するダイアログ生成
         fun showDialog()
@@ -31,6 +40,9 @@ interface GameViewContact {
     }
 
     interface Presenter {
+        // マスのサイズを計算
+        fun computeCellSize(width: Int, height: Int)
+
         // タッチイベントロジック
         fun onTouchEvent(touchX: Int, touchY: Int)
 

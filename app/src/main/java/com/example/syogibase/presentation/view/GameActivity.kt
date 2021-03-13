@@ -28,7 +28,7 @@ class GameActivity : AppCompatActivity() {
         super.onWindowFocusChanged(hasFocus)
 
         frame = this.findViewById(R.id.frame) as FrameLayout
-        gameView = GameView(this, this, frame!!.width, frame!!.height)
+        gameView = GameView(this)
         frame!!.addView(gameView, 0)
     }
 
