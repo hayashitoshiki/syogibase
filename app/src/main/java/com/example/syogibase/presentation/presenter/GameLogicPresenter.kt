@@ -85,29 +85,45 @@ class GameLogicPresenter(
         }
     }
 
+    // タッチイベントのロジック
+    override fun onTouchEventLogic(x: Int, y: Int, mode: BoardMode) {
+        when (mode) {
+            BoardMode.GAME -> {
+                view.onTouchEventByGameMode(x, y)
+            }
+            BoardMode.REPLAY -> {
+                view.onTouchEventByReplayMode(x, y)
+            }
+        }
+    }
+
     // 対局モード
     override fun onTouchEvent(touchX: Int, touchY: Int) {
         when {
-            // 上下に駒台が存在
+            // 左右に駒台が存在
             isVerticalStand && !isHorizontalStand -> {
                 // 持ち駒
-                if (touchX == 0 || touchX == 10) {
-                    setStandTouch(touchY)
+                if (touchX == 0 && touchY in 0..6) {
+                    useCase.setHintHoldPiece(8 - touchY, WHITE_HOLD, useCase.getTurn())
+                } else if (touchX == 10 && touchY in 2..8) {
+                    useCase.setHintHoldPiece(touchY, BLACK_HOLD, useCase.getTurn())
                 }
                 // 盤上
                 else if (touchX in 1..9 && touchY in 0..8) {
-                    val x = 9 - touchX + 1
+                    val x = 10 - touchX
                     val y = touchY + 1
                     setBoardTouch(x, y)
                 }
                 // 盤外
                 else useCase.cancel()
             }
-            // 左右に駒台が存在
+            // 上下に駒台が存在
             !isVerticalStand && isHorizontalStand -> {
                 // 持ち駒
-                if (touchY == 0 || touchY == 10) {
-                    setStandTouch(touchX)
+                if (touchY == 0 && touchX in 0..6) {
+                    useCase.setHintHoldPiece(8 - touchX, WHITE_HOLD, useCase.getTurn())
+                } else if (touchY == 10 && touchX in 2..8) {
+                    useCase.setHintHoldPiece(touchX, BLACK_HOLD, useCase.getTurn())
                 }
                 // 盤上
                 else if (touchX in 0..8 && touchY in 1..9) {
@@ -141,25 +157,28 @@ class GameLogicPresenter(
         }
     }
 
-    // 駒台タッチイベント
-    private fun setStandTouch(index: Int) {
-        var y = 0
-        var x = 0
-        when (useCase.getTurn()) {
-            BLACK -> {
-                x = index
-                y = BLACK_HOLD
-            }
-            WHITE -> {
-                x = 8 - index
-                y = WHITE_HOLD
-            }
-        }
-        useCase.setHintHoldPiece(x, y, useCase.getTurn())
-    }
-
 
     // 感想戦モード
+
+    // 感想戦のタッチダウンイベント処理のロジック
+    override fun onTouchDownEventByReplayModeLogic(x: Int, center: Int) {
+        if (x < center) {
+            view.setLongJobByBack()
+        } else {
+            view.setLongJobByGo()
+        }
+    }
+
+    // 感想戦のタッチアップイベント処理のロジック
+    override fun onTouchUpEventByReplayModeLogic(x: Int, center: Int) {
+        if (x < center) {
+            setBackMove()
+        } else {
+            setGoMove()
+        }
+        view.cancelLongJob()
+    }
+
 
     // １手戻る
     override fun setBackMove() {

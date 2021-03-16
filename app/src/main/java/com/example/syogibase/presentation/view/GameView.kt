@@ -3,7 +3,6 @@ package com.example.syogibase.presentation.view
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
-import android.os.Handler
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -12,6 +11,7 @@ import com.example.syogibase.data.local.Board.Companion.COLS
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
+import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
@@ -20,22 +20,17 @@ import org.koin.core.parameter.parametersOf
 class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     View(context, attrs, defStyleAttr), GameViewContact.View,
     KoinComponent {
-    constructor(context: Context?) : this(context, null) {}
-    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0) {}
+    constructor(context: Context?) : this(context, null)
+    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
 
     // region 変数
 
     private val presenter: GameViewContact.Presenter by inject { parametersOf(this) }
     private lateinit var canvas: Canvas
+    private lateinit var event: MotionEvent
 
+    private var job: Job? = null
     private var mode: BoardMode = BoardMode.GAME
-    private val longPressHandler = Handler()
-    private val longPressBack = Runnable {
-        presenter.setGoLastMove()
-    }
-    private val longPressGo = Runnable {
-        presenter.setBackFirstMove()
-    }
 
     private var cellWidth: Float = 0f
     private var cellHeight: Float = 0f
@@ -77,46 +72,76 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
         presenter.drawView()
     }
 
+    // endregion
+
+    // region タッチイベント
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        this.event = event
         val boardStartX = (width - (boardWidth + horizontalStandSpace * 2)) / 2
         val boardStartY = (height - (boardHeight + verticalStandSpace * 2)) / 2
-        val x = (((event.x - boardStartX) / cellWidth)).toInt()
-        val y = (((event.y - boardStartY) / cellHeight)).toInt()
-
-        when (mode) {
-            BoardMode.GAME -> {
-                when (event.action) {
-                    MotionEvent.ACTION_UP -> {
-                        presenter.onTouchEvent(x, y)
-                        invalidate()
-                    }
-                }
-            }
-            BoardMode.REPLAY -> {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        if (x in 4..8) {
-                            longPressHandler.postDelayed(longPressGo, 800)
-                        } else if (x in 0..4) {
-                            longPressHandler.postDelayed(longPressBack, 800)
-                        }
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        // TODO　後で絶対修正！！！
-                        if (x in 4..8) {
-                            presenter.setGoMove()
-                            longPressHandler.removeCallbacks(longPressGo)
-                        } else if (x in 0..4) {
-                            presenter.setBackMove()
-                            longPressHandler.removeCallbacks(longPressBack)
-                        }
-                        invalidate()
-                    }
-                }
-            }
-        }
+        val x = ((event.x - boardStartX) / cellWidth).toInt()
+        val y = ((event.y - boardStartY) / cellHeight).toInt()
+        presenter.onTouchEventLogic(x, y, mode)
         return true
     }
+
+    // 対局モードのタッチイベント処理
+    override fun onTouchEventByGameMode(x: Int, y: Int) {
+        when (event.action) {
+            MotionEvent.ACTION_UP -> {
+                presenter.onTouchEvent(x, y)
+                invalidate()
+            }
+        }
+    }
+
+    // 感想戦モードのタッチイベント処理
+    override fun onTouchEventByReplayMode(x: Int, y: Int) {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val centerCell = (width / cellWidth / 2).toInt()
+                presenter.onTouchDownEventByReplayModeLogic(x, centerCell)
+            }
+            MotionEvent.ACTION_UP -> {
+                val centerCell = (width / cellWidth / 2).toInt()
+                presenter.onTouchUpEventByReplayModeLogic(x, centerCell)
+                invalidate()
+            }
+        }
+    }
+
+    // 最初まで戻る処理の遅延処理セット
+    override fun setLongJobByBack() {
+        job = GlobalScope.launch {
+            delay(800)
+            if (!isActive) {
+                return@launch
+            }
+            handler.post {
+                presenter.setBackFirstMove()
+            }
+        }
+    }
+
+    // 最後まで進む処理の遅延処理セット
+    override fun setLongJobByGo() {
+        job = GlobalScope.launch {
+            delay(800)
+            if (!isActive) {
+                return@launch
+            }
+            handler.post {
+                presenter.setGoLastMove()
+            }
+        }
+    }
+
+    // 遅延処理キャンセル
+    override fun cancelLongJob() {
+        job?.cancel()
+    }
+
     // endregion
 
     // region 描画

@@ -1,5 +1,6 @@
 package com.example.syogibase.presentation.contact
 
+import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
 
 interface GameViewContact {
@@ -37,13 +38,35 @@ interface GameViewContact {
 
         // 対局終了ダイアログ生成
         fun gameEnd(turn: Int)
+
+        // 対局モードのタッチイベント処理
+        fun onTouchEventByGameMode(x: Int, y: Int)
+
+        // 感想戦モードのタッチイベント処理
+        fun onTouchEventByReplayMode(x: Int, y: Int)
+
+        // 戻るの遅延処理セット
+        fun setLongJobByBack()
+
+        // 進むの遅延処理セット
+        fun setLongJobByGo()
+
+        // キャンセル
+        fun cancelLongJob()
     }
 
     interface Presenter {
         // マスのサイズを計算
         fun computeCellSize(width: Int, height: Int)
 
-        // タッチイベントロジック
+        // 感想戦のタッチダウンイベントのロジック
+        fun onTouchDownEventByReplayModeLogic(x: Int, center: Int)
+
+        // 感想戦のタッチアップイベントのロジック
+        fun onTouchUpEventByReplayModeLogic(x: Int, center: Int)
+
+        fun onTouchEventLogic(x: Int, y: Int, mode: BoardMode)
+
         fun onTouchEvent(touchX: Int, touchY: Int)
 
         // 描画ロジック
