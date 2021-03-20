@@ -3,11 +3,14 @@ package com.example.syogibase.presentation.view
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
 import com.example.syogibase.data.local.Board.Companion.COLS
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
@@ -24,6 +27,13 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0)
 
     // region 変数
+
+    private var bmp = BitmapFactory.decodeResource(resources, R.drawable.syogi_board)
+    private var holdStand = BitmapFactory.decodeResource(resources, R.drawable.syogi_stand)
+    private lateinit var soundPool: SoundPool
+    private var soundOne = 0
+    private var hintColor = Color.argb(200, 255, 255, 0)
+    private var listener: GameViewContact.GameEndListener? = null
 
     private val presenter: GameViewContact.Presenter by inject { parametersOf(this) }
     private lateinit var canvas: Canvas
@@ -54,6 +64,20 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     // endregion
 
     // region ライフサイクル
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // 音声設定
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .build()
+        soundPool = SoundPool.Builder()
+            .setAudioAttributes(audioAttributes)
+            .setMaxStreams(1)
+            .build()
+        soundOne = soundPool.load(context, R.raw.sound_japanese_chess, 1)
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -150,7 +174,6 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     override fun drawBoard() {
         // 盤面セット
         val paint = Paint()
-        val bmp = BitmapFactory.decodeResource(resources, R.drawable.free_grain_sub)
         val rect1 = Rect(0, 0, bmp.width, bmp.height)
         val boardStartX = horizontalStandSpace.toInt()
         val boardStartY = verticalStandSpace.toInt()
@@ -179,33 +202,37 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     // 盤面の上下に駒台描画
     override fun drawHorizontalStand() {
         val paint = Paint()
-        paint.color = Color.rgb(251, 171, 83)
-        val whiteStandStartX = 0f
-        val whiteStandStartY = 0f
-        val whiteStandEndX = boardWidth - cellWidth * 2
-        val whiteStandEndY = verticalStandSpace
-        canvas.drawRect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY, paint)
-        val blackStandStartX = cellWidth * 2
-        val blackStandStartY = boardHeight + verticalStandSpace
-        val blackStandEndX = boardWidth
-        val blackStandEndY = boardHeight + verticalStandSpace * 2
-        canvas.drawRect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY, paint)
+        val rect1 = Rect(0, 0, holdStand.width, holdStand.height)
+        val whiteStandStartX = 0
+        val whiteStandStartY = 0
+        val whiteStandEndX = (boardWidth - cellWidth * 2).toInt()
+        val whiteStandEndY = verticalStandSpace.toInt()
+        val rect2 = Rect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY)
+        canvas.drawBitmap(holdStand, rect1, rect2, paint)
+        val blackStandStartX = (cellWidth * 2).toInt()
+        val blackStandStartY = (boardHeight + verticalStandSpace).toInt()
+        val blackStandEndX = boardWidth.toInt()
+        val blackStandEndY = (boardHeight + verticalStandSpace * 2).toInt()
+        val rect3 = Rect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY)
+        canvas.drawBitmap(holdStand, rect1, rect3, paint)
     }
 
     // 盤面の左右に駒台描画
     override fun drawVerticalStand() {
         val paint = Paint()
-        paint.color = Color.rgb(251, 171, 83)
-        val whiteStandStartX = 0f
-        val whiteStandStartY = 0f
-        val whiteStandEndX = horizontalStandSpace
-        val whiteStandEndY = boardHeight - cellHeight * 2
-        canvas.drawRect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY, paint)
-        val blackStandStartX = boardHeight + horizontalStandSpace
-        val blackStandStartY = cellHeight * 2
-        val blackStandEndX = boardWidth + horizontalStandSpace * 2
-        val blackStandEndY = boardHeight
-        canvas.drawRect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY, paint)
+        val rect1 = Rect(0, 0, holdStand.width, holdStand.height)
+        val whiteStandStartX = 0
+        val whiteStandStartY = 0
+        val whiteStandEndX = horizontalStandSpace.toInt()
+        val whiteStandEndY = (boardHeight - cellHeight * 2).toInt()
+        val rect2 = Rect(whiteStandStartX, whiteStandStartY, whiteStandEndX, whiteStandEndY)
+        canvas.drawBitmap(holdStand, rect1, rect2, paint)
+        val blackStandStartX = (boardHeight + horizontalStandSpace).toInt()
+        val blackStandStartY = (cellHeight * 2).toInt()
+        val blackStandEndX = (boardWidth + horizontalStandSpace * 2).toInt()
+        val blackStandEndY = boardHeight.toInt()
+        val rect3 = Rect(blackStandStartX, blackStandStartY, blackStandEndX, blackStandEndY)
+        canvas.drawBitmap(holdStand, rect1, rect3, paint)
     }
 
     // 先手の駒描画
@@ -272,7 +299,7 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     // ヒント描画メソッド
     override fun drawHint(x: Int, y: Int) {
         val paint = Paint()
-        paint.color = (Color.argb(200, 255, 255, 0))
+        paint.color = hintColor
         val centerX = cellWidth * (x + (horizontalStandSpace / cellWidth).toInt()) + cellWidth / 2
         val centerY = cellHeight * (y + (verticalStandSpace / cellHeight).toInt()) + cellHeight / 2
         val radius = (cellWidth * 0.46).toFloat()
@@ -299,21 +326,10 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
 
     // 終了ダイアログ表示
     override fun gameEnd(turn: Int) {
-        AlertDialog.Builder(context)
-            .setTitle("終了")
-            .setMessage("勝ち")
-            .setPositiveButton("終了") { dialog, which ->
-                //activity.finish()
-                setBoardMove(BoardMode.REPLAY)
-            }
-            .setNeutralButton("もう一度") { dialog, which ->
-                presenter.reset()
-            }
-            .setNegativeButton("感想戦") { dialog, which ->
-                setBoardMove(BoardMode.REPLAY)
-            }
-            .show()
+        setBoardMove(BoardMode.REPLAY)
+        listener?.onGameEnd(turn)
     }
+    // endregion
 
     // region 設定
 
@@ -323,14 +339,78 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
         cellHeight = size
     }
 
+    // endregion
+
+    // region その他
+
+    // 駒音再生
+    override fun playbackEffect() {
+        // play(ロードしたID, 左音量, 右音量, 優先度, ループ, 再生速度)
+        soundPool.play(soundOne, 1.0f, 1.0f, 0, 0, 1.0f)
+    }
+
+    // endregion
+
+    // region 外部設定用メソッド
+
     // Viewのモード設定
     fun setBoardMove(mode: BoardMode) {
         this.mode = mode
     }
 
+    // リセット
+    fun reset() {
+        presenter.reset()
+    }
+
+    // 対局終了を知らせるリスナー設定
+    fun setGameEndListener(listener: GameViewContact.GameEndListener) {
+        this.listener = listener
+    }
+
+    // ヒントの表示設定
+    fun enableHint(enable: Boolean) {
+        presenter.setEnableHint(enable)
+    }
+
+    // 駒音有効設定
+    fun enableTouchSound(enable: Boolean) {
+        presenter.setEnableTouchSound(enable)
+    }
+
     // ハンデ設定
     fun setHandicap(turn: Int, handicap: Handicap) {
         presenter.setHandicap(turn, handicap)
+    }
+
+    // 盤面画像設定
+    fun setBoardImage(resourceId: Int) {
+        bmp = BitmapFactory.decodeResource(resources, resourceId)
+    }
+
+    // 持ち駒台画像設定
+    fun setHoldStandImage(resourceId: Int) {
+        bmp = BitmapFactory.decodeResource(resources, resourceId)
+    }
+
+    // ヒント色設定
+    fun setHintColor(color: Int) {
+        hintColor = color
+    }
+
+    // 駒音設定
+    fun setMoveSound(resourceId: Int) {
+        soundOne = soundPool.load(context, resourceId, 1)
+    }
+
+    // 棋譜設定
+    fun setLog(logList: List<GameLog>) {
+        presenter.setGameLog(logList)
+    }
+
+    // 棋譜取得
+    fun getLog() {
+        presenter.getGameLog()
     }
 
     // endregion

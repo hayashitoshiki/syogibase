@@ -1,9 +1,14 @@
 package com.example.syogibase.presentation.contact
 
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
 
 interface GameViewContact {
+
+    interface GameEndListener {
+        fun onGameEnd(winner: Int)
+    }
 
     interface View {
         // マスのサイズ設定
@@ -38,6 +43,9 @@ interface GameViewContact {
 
         // 対局終了ダイアログ生成
         fun gameEnd(turn: Int)
+
+        // 駒音再生
+        fun playbackEffect()
 
         // 対局モードのタッチイベント処理
         fun onTouchEventByGameMode(x: Int, y: Int)
@@ -92,5 +100,17 @@ interface GameViewContact {
 
         // 駒落ち設定
         fun setHandicap(turn: Int, handicap: Handicap)
+
+        // 駒音有効設定
+        fun setEnableTouchSound(enable: Boolean)
+
+        // ヒントの表示設定
+        fun setEnableHint(enable: Boolean)
+
+        //棋譜設定
+        fun setGameLog(logList: List<GameLog>)
+
+        // 棋譜取得
+        fun getGameLog(): List<GameLog>
     }
 }

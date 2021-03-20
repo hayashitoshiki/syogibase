@@ -2,6 +2,7 @@ package com.example.syogibase.presentation.presenter
 
 import com.example.syogibase.data.local.Board.Companion.COLS
 import com.example.syogibase.data.local.Board.Companion.ROWS
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.*
@@ -12,8 +13,11 @@ class GameLogicPresenter(
 ) : GameViewContact.Presenter {
 
 
+    // 有効設定
     private var isVerticalStand = false
     private var isHorizontalStand = false
+    private var isMoveSound = true
+    private var isShowHint = true
 
     // マスのサイズ計算
     override fun computeCellSize(width: Int, height: Int) {
@@ -46,7 +50,7 @@ class GameLogicPresenter(
                 BLACK -> view.drawBlackPiece(cell.piece.nameJP, (COLS - 1) - i, j)
                 WHITE -> view.drawWhitePiece(cell.piece.nameJP, (COLS - 1) - i, j)
             }
-            if (cell.hint) view.drawHint((COLS - 1) - i, j)
+            if (cell.hint && isShowHint) view.drawHint((COLS - 1) - i, j)
         }
         // 駒台
         if (isVerticalStand) {
@@ -145,6 +149,7 @@ class GameLogicPresenter(
                 if (useCase.isEvolution(x, y) && !useCase.isCompulsionEvolution()) {
                     view.showDialog()
                 }
+                if (isMoveSound) view.playbackEffect()
                 // 千日手判定
                 if (useCase.isRepetitionMove()) view.gameEnd(3)
                 // トライルール判定
@@ -213,5 +218,25 @@ class GameLogicPresenter(
     // ハンデ設定
     override fun setHandicap(turn: Int, handicap: Handicap) {
         useCase.setHandicap(turn, handicap)
+    }
+
+    // 駒音有効設定
+    override fun setEnableTouchSound(enable: Boolean) {
+        isMoveSound = enable
+    }
+
+    // ヒントの表示設定
+    override fun setEnableHint(enable: Boolean) {
+        isShowHint = enable
+    }
+
+    // 棋譜設定
+    override fun setGameLog(logList: List<GameLog>) {
+        useCase.setGameLog(logList)
+    }
+
+    // 棋譜取得
+    override fun getGameLog(): List<GameLog> {
+        return useCase.getGameLog()
     }
 }

@@ -1,5 +1,6 @@
 package com.example.syogibase.presentation.view
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.syogibase.R
+import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
 
 
@@ -29,6 +31,23 @@ class GameActivity : AppCompatActivity() {
 
         frame = this.findViewById(R.id.frame) as FrameLayout
         gameView = GameView(this)
+        gameView.setGameEndListener(object : GameViewContact.GameEndListener {
+            override fun onGameEnd(winner: Int) {
+                AlertDialog.Builder(this@GameActivity)
+                    .setTitle("終了")
+                    .setMessage("勝ち")
+                    .setPositiveButton("終了") { dialog, which ->
+                        finish()
+                    }
+                    .setNeutralButton("もう一度") { dialog, which ->
+                        gameView.reset()
+                    }
+                    .setNegativeButton("感想戦") { dialog, which ->
+                    }
+                    .show()
+            }
+        }
+        )
         frame!!.addView(gameView, 0)
     }
 

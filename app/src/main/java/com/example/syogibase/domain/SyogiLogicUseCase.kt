@@ -1,6 +1,7 @@
 package com.example.syogibase.domain
 
 import com.example.syogibase.data.local.Cell
+import com.example.syogibase.data.local.GameLog
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.util.Handicap
 
@@ -80,8 +81,18 @@ interface SyogiLogicUseCase {
     // 最後まで進む
     fun setGoLastMove()
 
+    // endregion
+
+    // region 設定
+
     // リセットする
     fun reset()
+
+    // 棋譜設定
+    fun setGameLog(logList: List<GameLog>)
+
+    // 棋譜取得
+    fun getGameLog(): List<GameLog>
 
     // endregion
 }

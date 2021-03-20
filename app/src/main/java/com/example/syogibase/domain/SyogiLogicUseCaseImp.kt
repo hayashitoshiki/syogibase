@@ -232,7 +232,7 @@ class SyogiLogicUseCaseImp(
 
     // 終了判定
     override fun isGameEnd(): Boolean {
-        // もし王手&詰み判定
+        // 詰み判定
         if (isCheckmate()) {
             return true
         }
@@ -536,6 +536,16 @@ class SyogiLogicUseCaseImp(
         turn = BLACK
         logList.removeAll(logList)
         boardRepository.setBoard(Board().cells)
+    }
+
+    //棋譜設定
+    override fun setGameLog(logList: List<GameLog>) {
+        this.logList.addAll(logList)
+    }
+
+    // 棋譜取得
+    override fun getGameLog(): List<GameLog> {
+        return logList
     }
 
 
