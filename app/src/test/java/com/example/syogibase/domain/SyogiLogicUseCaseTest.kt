@@ -2,10 +2,7 @@ package com.example.syogibase.domain
 
 import com.example.syogibase.data.BoardRepository
 import com.example.syogibase.data.BoardRepositoryImp
-import com.example.syogibase.data.local.Board
-import com.example.syogibase.data.local.Cell
-import com.example.syogibase.data.local.GameLog
-import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.local.*
 import com.example.syogibase.util.BLACK
 import com.example.syogibase.util.BLACK_HOLD
 import com.example.syogibase.util.WHITE
@@ -43,7 +40,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -56,15 +53,15 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[4][0].piece = Piece.OU
-        cells[4][0].turn = 2
+        cells[4][0].turn = WHITE
         cells[4][1].piece = Piece.KIN
-        cells[4][1].turn = 1
+        cells[4][1].turn = BLACK
         cells[4][2].piece = Piece.KIN
-        cells[4][2].turn = 1
+        cells[4][2].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(BLACK))
     }
 
     /**
@@ -87,7 +84,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -100,19 +97,19 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[0][0].piece = Piece.OU
-        cells[0][0].turn = 2
+        cells[0][0].turn = WHITE
         cells[1][0].piece = Piece.KYO
-        cells[1][0].turn = 2
+        cells[1][0].turn = WHITE
         cells[1][1].piece = Piece.KIN
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
         cells[0][3].piece = Piece.KYO
-        cells[0][3].turn = 1
+        cells[0][3].turn = BLACK
         cells[3][3].piece = Piece.KAKU
-        cells[3][3].turn = 1
+        cells[3][3].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(BLACK))
     }
 
     /**
@@ -125,19 +122,19 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[0][0].piece = Piece.OU
-        cells[0][0].turn = 2
+        cells[0][0].turn = WHITE
         cells[0][1].piece = Piece.KYO
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
         cells[1][0].piece = Piece.KEI
-        cells[1][0].turn = 2
+        cells[1][0].turn = WHITE
         cells[1][1].piece = Piece.KIN
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
         cells[1][2].piece = Piece.KYO
-        cells[1][2].turn = 1
+        cells[1][2].turn = WHITE
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -150,21 +147,21 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[0][0].piece = Piece.GYOKU
-        cells[0][0].turn = 2
+        cells[0][0].turn = WHITE
         cells[0][1].piece = Piece.KYO
-        cells[0][1].turn = 2
+        cells[0][1].turn = WHITE
         cells[1][0].piece = Piece.KEI
-        cells[1][0].turn = 2
+        cells[1][0].turn = WHITE
         cells[1][1].piece = Piece.KEI
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
         cells[1][2].piece = Piece.KEI
-        cells[1][2].turn = 1
+        cells[1][2].turn = BLACK
         cells[3][3].piece = Piece.KAKU
-        cells[3][3].turn = 1
+        cells[3][3].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(BLACK))
     }
 
     /**
@@ -177,13 +174,13 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[0][0].piece = Piece.GYOKU
-        cells[0][0].turn = 2
+        cells[0][0].turn = WHITE
         cells[1][0].piece = Piece.KYO
-        cells[1][0].turn = 2
+        cells[1][0].turn = WHITE
         cells[1][1].piece = Piece.KYO
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
         cells[0][2].piece = Piece.KYO
-        cells[0][2].turn = 1
+        cells[0][2].turn = BLACK
         val holdPieceWhite = mutableMapOf(
             Piece.FU to 1,
             Piece.KYO to 1,
@@ -198,7 +195,7 @@ class SyogiLogicUseCaseTest {
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -223,7 +220,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -251,7 +248,7 @@ class SyogiLogicUseCaseTest {
         logList.isAccessible = true
         logList.set(useCase, log)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(WHITE))
     }
 
     /**
@@ -277,7 +274,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -305,7 +302,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(WHITE))
     }
 
     /**
@@ -333,7 +330,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     /**
@@ -363,7 +360,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, true)
+        assertEquals(result, GameResult.Win(WHITE))
     }
 
     /**
@@ -400,7 +397,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         val result = useCase.isGameEnd()
-        assertEquals(result, false)
+        assertEquals(result, GameResult.Continue)
     }
 
     // endregion
@@ -416,7 +413,7 @@ class SyogiLogicUseCaseTest {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[4][4].piece = Piece.OU
-        cells[4][4].turn = 1
+        cells[4][4].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
@@ -434,7 +431,7 @@ class SyogiLogicUseCaseTest {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[8][0].piece = Piece.OU
-        cells[8][0].turn = 1
+        cells[8][0].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
@@ -452,7 +449,7 @@ class SyogiLogicUseCaseTest {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[8][8].piece = Piece.OU
-        cells[8][8].turn = 1
+        cells[8][8].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
@@ -470,23 +467,23 @@ class SyogiLogicUseCaseTest {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[3][3].piece = Piece.FU
-        cells[3][3].turn = 1
+        cells[3][3].turn = BLACK
         cells[3][4].piece = Piece.KIN
-        cells[3][4].turn = 1
+        cells[3][4].turn = BLACK
         cells[3][5].piece = Piece.GIN
-        cells[3][5].turn = 1
+        cells[3][5].turn = BLACK
         cells[4][3].piece = Piece.FU
-        cells[4][3].turn = 1
+        cells[4][3].turn = BLACK
         cells[4][4].piece = Piece.OU
-        cells[4][4].turn = 1
+        cells[4][4].turn = BLACK
         cells[4][5].piece = Piece.KEI
-        cells[4][5].turn = 1
+        cells[4][5].turn = BLACK
         cells[5][3].piece = Piece.FU
-        cells[5][3].turn = 1
+        cells[5][3].turn = BLACK
         cells[5][4].piece = Piece.KIN
-        cells[5][4].turn = 1
+        cells[5][4].turn = BLACK
         cells[5][5].piece = Piece.GIN
-        cells[5][5].turn = 1
+        cells[5][5].turn = BLACK
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
@@ -505,15 +502,15 @@ class SyogiLogicUseCaseTest {
         val boarRepository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[4][2].piece = Piece.KEI
-        cells[4][2].turn = 2
+        cells[4][2].turn = WHITE
         cells[4][4].piece = Piece.OU
-        cells[4][4].turn = 1
+        cells[4][4].turn = BLACK
         cells[2][3].piece = Piece.HISYA
-        cells[2][3].turn = 2
+        cells[2][3].turn = WHITE
         cells[4][6].piece = Piece.KAKU
-        cells[4][6].turn = 2
+        cells[4][6].turn = WHITE
         cells[5][6].piece = Piece.GIN
-        cells[5][6].turn = 2
+        cells[5][6].turn = WHITE
         val useCase = SyogiLogicUseCaseImp(boarRepository)
         useCase.setBoard(cells)
         // 実行
@@ -557,23 +554,23 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[0][1].piece = Piece.FU
-        cells[0][1].turn = 1
+        cells[0][1].turn = BLACK
         cells[1][1].piece = Piece.FU
-        cells[1][1].turn = 1
+        cells[1][1].turn = BLACK
         cells[2][2].piece = Piece.FU
-        cells[2][2].turn = 1
+        cells[2][2].turn = BLACK
         cells[3][3].piece = Piece.FU
-        cells[3][3].turn = 1
+        cells[3][3].turn = BLACK
         cells[4][4].piece = Piece.FU
-        cells[4][4].turn = 1
+        cells[4][4].turn = BLACK
         cells[5][5].piece = Piece.FU
-        cells[5][5].turn = 1
+        cells[5][5].turn = BLACK
         cells[6][6].piece = Piece.FU
-        cells[6][6].turn = 1
+        cells[6][6].turn = BLACK
         cells[7][7].piece = Piece.FU
-        cells[7][7].turn = 1
+        cells[7][7].turn = BLACK
         cells[8][8].piece = Piece.FU
-        cells[8][8].turn = 1
+        cells[8][8].turn = BLACK
         doReturn(Piece.FU).whenever(repository).findHoldPieceBy(any(), any())
         val useCase = SyogiLogicUseCaseImp(repository)
         useCase.setBoard(cells)
@@ -592,9 +589,9 @@ class SyogiLogicUseCaseTest {
         val repository = spy(BoardRepositoryImp())
         val cells = Array(Board.COLS) { Array(Board.ROWS) { Cell() } }
         cells[5][5].piece = Piece.OU
-        cells[5][5].turn = 1
+        cells[5][5].turn = BLACK
         cells[1][1].piece = Piece.GIN
-        cells[1][1].turn = 2
+        cells[1][1].turn = WHITE
 
         doReturn(Piece.KIN).whenever(repository).findHoldPieceBy(any(), any())
         val useCase = SyogiLogicUseCaseImp(repository)
@@ -771,7 +768,7 @@ class SyogiLogicUseCaseTest {
         logList.isAccessible = true
         logList.set(useCase, log)
         // 実行
-        val result = useCase.isEvolution(3, 3)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 
@@ -792,7 +789,7 @@ class SyogiLogicUseCaseTest {
         logList.isAccessible = true
         logList.set(useCase, log)
         // 実行
-        val result = useCase.isEvolution(3, 8)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 
@@ -813,7 +810,7 @@ class SyogiLogicUseCaseTest {
         logList.isAccessible = true
         logList.set(useCase, log)
         // 実行
-        val result = useCase.isEvolution(3, 3)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 
@@ -834,7 +831,7 @@ class SyogiLogicUseCaseTest {
         logList.isAccessible = true
         logList.set(useCase, log)
         // 実行
-        val result = useCase.isEvolution(3, 7)
+        val result = useCase.isEvolution()
         assertEquals(result, false)
     }
 
@@ -858,7 +855,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(3, 7)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 
@@ -882,7 +879,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(3, 3)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 
@@ -906,7 +903,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(8, 3)
+        val result = useCase.isEvolution()
         assertEquals(result, false)
     }
 
@@ -930,7 +927,7 @@ class SyogiLogicUseCaseTest {
         turn.isAccessible = true
         turn.set(useCase, WHITE)
         // 実行
-        val result = useCase.isEvolution(8, 7)
+        val result = useCase.isEvolution()
         assertEquals(result, true)
     }
 

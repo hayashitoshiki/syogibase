@@ -2,6 +2,7 @@ package com.example.syogibase.domain
 
 import com.example.syogibase.data.local.Cell
 import com.example.syogibase.data.local.GameLog
+import com.example.syogibase.data.local.GameResult
 import com.example.syogibase.data.local.Piece
 import com.example.syogibase.util.Handicap
 
@@ -48,7 +49,7 @@ interface SyogiLogicUseCase {
     // region ルール
 
     // 詰み判定
-    fun isGameEnd(): Boolean
+    fun isGameEnd(): GameResult
 
     // 千日手判定
     fun isRepetitionMove(): Boolean
@@ -57,7 +58,10 @@ interface SyogiLogicUseCase {
     fun isTryKing(): Boolean
 
     // 成り判定
-    fun isEvolution(x: Int, y: Int): Boolean
+    fun isSelectEvolution(): Boolean
+
+    // 成り判定
+    fun isEvolution(): Boolean
 
     // 成り判定 強制か否か
     fun isCompulsionEvolution(): Boolean

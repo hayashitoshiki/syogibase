@@ -114,7 +114,7 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     override fun onTouchEventByGameMode(x: Int, y: Int) {
         when (event.action) {
             MotionEvent.ACTION_UP -> {
-                presenter.onTouchEvent(x, y)
+                presenter.onTouchEventByGameMode(x, y)
                 invalidate()
             }
         }
@@ -317,9 +317,11 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
         alertBuilder.setPositiveButton("はい") { _, _ ->
             presenter.evolutionPiece()
             invalidate()
+            presenter.checkGameEnd()
         }
         alertBuilder.setNegativeButton("いいえ") { _, _ ->
             invalidate()
+            presenter.checkGameEnd()
         }
         alertBuilder.create().show()
     }

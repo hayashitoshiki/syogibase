@@ -231,13 +231,16 @@ class SyogiLogicUseCaseImp(
     }
 
     // 終了判定
-    override fun isGameEnd(): Boolean {
+    override fun isGameEnd(): GameResult {
+        // 千日手判定
+        if (isRepetitionMove()) return GameResult.Draw
+        // トライルール判定
+        if (isTryKing()) return GameResult.Win(getTurn())
         // 詰み判定
-        if (isCheckmate()) {
-            return true
-        }
+        if (isCheckmate()) return GameResult.Win(getTurn())
+        // 対局続行
         turn = if (turn == BLACK) WHITE else BLACK
-        return false
+        return GameResult.Continue
     }
 
     // 王手判定
@@ -432,14 +435,21 @@ class SyogiLogicUseCaseImp(
         return result
     }
 
-    // 成り判定
-    override fun isEvolution(x: Int, y: Int): Boolean {
-        val before = PieceMove(logList.last().oldX, logList.last().oldY)
-        return (before.y + 1 in 1..9 && boardRepository.getPiece(x - 1, y - 1)
-            .findEvolution()) && ((turn == BLACK && (y <= 3 || before.y + 1 <= 3)) || (turn == WHITE && (7 <= y || 7 <= before.y + 1)))
+    // 成るか成らないか選択できるか判定
+    override fun isSelectEvolution(): Boolean {
+        return isEvolution() && !isCompulsionEvolution()
     }
 
-    // 成り判定 強制か否か
+    // 成り判定
+    override fun isEvolution(): Boolean {
+        val oldY = logList.last().oldY + 1
+        val newX = logList.last().newX + 1
+        val newY = logList.last().newY + 1
+        return (oldY in 1..9 && boardRepository.getPiece(newX - 1, newY - 1).findEvolution()) &&
+                ((turn == BLACK && (newY <= 3 || oldY <= 3)) || (turn == WHITE && (7 <= newY || 7 <= oldY)))
+    }
+
+    // 強制的にならないといけないか判定
     override fun isCompulsionEvolution(): Boolean {
         val log: GameLog = logList.last()
         return when (log.afterPiece) {

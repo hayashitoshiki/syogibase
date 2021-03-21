@@ -3,6 +3,7 @@ package com.example.syogibase.presentation.presenter
 import com.example.syogibase.data.local.Board.Companion.COLS
 import com.example.syogibase.data.local.Board.Companion.ROWS
 import com.example.syogibase.data.local.GameLog
+import com.example.syogibase.data.local.GameResult
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.*
@@ -102,7 +103,7 @@ class GameLogicPresenter(
     }
 
     // 対局モード
-    override fun onTouchEvent(touchX: Int, touchY: Int) {
+    override fun onTouchEventByGameMode(touchX: Int, touchY: Int) {
         when {
             // 左右に駒台が存在
             isVerticalStand && !isHorizontalStand -> {
@@ -146,19 +147,23 @@ class GameLogicPresenter(
         when (useCase.getCellTurn(x, y)) {
             HINT -> {
                 useCase.setMove(x, y, false)
-                if (useCase.isEvolution(x, y) && !useCase.isCompulsionEvolution()) {
-                    view.showDialog()
-                }
                 if (isMoveSound) view.playbackEffect()
-                // 千日手判定
-                if (useCase.isRepetitionMove()) view.gameEnd(3)
-                // トライルール判定
-                if (useCase.isTryKing()) view.gameEnd(useCase.getTurn())
-                // 王手判定
-                if (useCase.isGameEnd()) view.gameEnd(useCase.getTurn())
+                if (useCase.isSelectEvolution()) {
+                    view.showDialog()
+                } else {
+                    checkGameEnd()
+                }
             }
             useCase.getTurn() -> useCase.setTouchHint(x, y)
             else -> useCase.cancel()
+        }
+    }
+
+    // 終了判定
+    override fun checkGameEnd() {
+        when (val result = useCase.isGameEnd()) {
+            is GameResult.Draw -> view.gameEnd(0)
+            is GameResult.Win -> view.gameEnd(result.winner)
         }
     }
 
@@ -205,7 +210,7 @@ class GameLogicPresenter(
         useCase.setGoLastMove()
     }
 
-    // 成り判定
+    // 成り
     override fun evolutionPiece() {
         useCase.setEvolution()
     }

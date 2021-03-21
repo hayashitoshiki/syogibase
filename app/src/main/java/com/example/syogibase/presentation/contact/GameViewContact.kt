@@ -7,6 +7,7 @@ import com.example.syogibase.util.Handicap
 interface GameViewContact {
 
     interface GameEndListener {
+        // 対局終了通知リスナー
         fun onGameEnd(winner: Int)
     }
 
@@ -67,15 +68,20 @@ interface GameViewContact {
         // マスのサイズを計算
         fun computeCellSize(width: Int, height: Int)
 
+        // 画面をタッチしたときのモード判定ロジック
+        fun onTouchEventLogic(x: Int, y: Int, mode: BoardMode)
+
+        // 対局モードのタッチイベントのロジック
+        fun onTouchEventByGameMode(touchX: Int, touchY: Int)
+
         // 感想戦のタッチダウンイベントのロジック
         fun onTouchDownEventByReplayModeLogic(x: Int, center: Int)
 
         // 感想戦のタッチアップイベントのロジック
         fun onTouchUpEventByReplayModeLogic(x: Int, center: Int)
 
-        fun onTouchEventLogic(x: Int, y: Int, mode: BoardMode)
-
-        fun onTouchEvent(touchX: Int, touchY: Int)
+        // 終了判定
+        fun checkGameEnd()
 
         // 描画ロジック
         fun drawView()

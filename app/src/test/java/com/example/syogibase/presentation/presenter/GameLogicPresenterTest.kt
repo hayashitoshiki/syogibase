@@ -327,7 +327,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..8) {
             for (j in 1..9) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
                 verify(useCase, times(1)).setTouchHint(9 - i, j)
             }
         }
@@ -351,7 +351,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 1..9) {
             for (j in 0..8) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
                 verify(useCase, times(1)).setTouchHint(10 - i, j + 1)
             }
         }
@@ -377,7 +377,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..8) {
             for (j in 1..9) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
                 verify(useCase, times(1)).setMove(9 - i, j, false)
             }
         }
@@ -403,7 +403,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 1..9) {
             for (j in 0..8) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
                 verify(useCase, times(1)).setMove(10 - i, j + 1, false)
             }
         }
@@ -428,7 +428,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..8) {
             for (j in 0..10) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
             }
         }
         verify(useCase, times(4)).cancel()
@@ -451,7 +451,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..10) {
             for (j in 0..8) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
             }
         }
         verify(useCase, times(4)).cancel()
@@ -475,7 +475,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..8) {
             for (j in 0..10) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
             }
         }
         verify(useCase, times(14)).setHintHoldPiece(anyInt(), anyInt(), anyInt())
@@ -499,7 +499,7 @@ class GameLogicPresenterTest {
         turn.set(presenter, true)
         for (i in 0..10) {
             for (j in 0..8) {
-                presenter.onTouchEvent(i, j)
+                presenter.onTouchEventByGameMode(i, j)
             }
         }
         verify(useCase, times(14)).setHintHoldPiece(anyInt(), anyInt(), anyInt())
