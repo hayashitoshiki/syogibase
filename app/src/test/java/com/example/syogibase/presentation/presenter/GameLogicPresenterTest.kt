@@ -1,7 +1,6 @@
 package com.example.syogibase.presentation.presenter
 
-import com.example.syogibase.data.BoardRepositoryImp
-import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.entity.Piece
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.domain.SyogiLogicUseCaseImp
 import com.example.syogibase.presentation.contact.GameViewContact
@@ -26,8 +25,7 @@ class GameLogicPresenterTest {
      */
     @Test
     fun drawViewByLongHeight() {
-        val repository = spy(BoardRepositoryImp())
-        val useCase = spy(SyogiLogicUseCaseImp(repository))
+        val useCase = spy(SyogiLogicUseCaseImp())
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
@@ -50,8 +48,7 @@ class GameLogicPresenterTest {
      */
     @Test
     fun drawViewByLongWidth() {
-        val repository = spy(BoardRepositoryImp())
-        val useCase = spy(SyogiLogicUseCaseImp(repository))
+        val useCase = spy(SyogiLogicUseCaseImp())
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
@@ -89,8 +86,7 @@ class GameLogicPresenterTest {
             hold.add(i, Pair(piece, count))
             i++
         }
-        val repository = spy(BoardRepositoryImp())
-        val useCase = spy(SyogiLogicUseCaseImp(repository))
+        val useCase = spy(SyogiLogicUseCaseImp())
         doReturn(hold).whenever(useCase).getPieceHand(BLACK)
         useCase.getPieceHand(BLACK)
         val view = mock<GameViewContact.View> {}
@@ -130,8 +126,7 @@ class GameLogicPresenterTest {
             hold.add(i, Pair(piece, count))
             i++
         }
-        val repository = spy(BoardRepositoryImp())
-        val useCase = spy(SyogiLogicUseCaseImp(repository))
+        val useCase = spy(SyogiLogicUseCaseImp())
         doReturn(hold).whenever(useCase).getPieceHand(WHITE)
         useCase.getPieceHand(WHITE)
         val view = mock<GameViewContact.View> {}
@@ -305,7 +300,6 @@ class GameLogicPresenterTest {
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         presenter.onTouchUpEventByReplayModeLogic(5, 5)
-        verify(useCase, times(1)).setGoMove()
         verify(view, times(1)).cancelLongJob()
     }
 
@@ -466,7 +460,6 @@ class GameLogicPresenterTest {
     fun onTouchStandByGameModeAndHorizontalStand() {
         val useCase = mock<SyogiLogicUseCase> {
             on { getCellTurn(anyInt(), anyInt()) } doReturn BLACK
-            on { getTurn() } doReturn BLACK
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
@@ -490,7 +483,6 @@ class GameLogicPresenterTest {
     fun onTouchStandByGameModeAndVerticalStand() {
         val useCase = mock<SyogiLogicUseCase> {
             on { getCellTurn(anyInt(), anyInt()) } doReturn BLACK
-            on { getTurn() } doReturn BLACK
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)

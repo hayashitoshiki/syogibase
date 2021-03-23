@@ -1,4 +1,4 @@
-package com.example.syogibase.data.local
+package com.example.syogibase.data.entity
 
 // 判定結果を返すクラス
 sealed class GameResult {

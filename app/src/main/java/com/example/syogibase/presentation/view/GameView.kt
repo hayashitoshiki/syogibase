@@ -9,8 +9,8 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
-import com.example.syogibase.data.local.Board.Companion.COLS
-import com.example.syogibase.data.local.GameLog
+import com.example.syogibase.data.entity.Board.Companion.COLS
+import com.example.syogibase.data.entity.GameLog
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap

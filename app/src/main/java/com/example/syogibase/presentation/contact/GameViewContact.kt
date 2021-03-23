@@ -1,6 +1,6 @@
 package com.example.syogibase.presentation.contact
 
-import com.example.syogibase.data.local.GameLog
+import com.example.syogibase.data.entity.GameLog
 import com.example.syogibase.util.BoardMode
 import com.example.syogibase.util.Handicap
 

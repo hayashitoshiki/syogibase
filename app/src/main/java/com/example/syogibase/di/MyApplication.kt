@@ -1,11 +1,9 @@
 package com.example.syogibase.di
 
 import android.app.Application
-import com.example.syogibase.data.BoardRepository
-import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.data.BoardRepositoryImp
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.domain.SyogiLogicUseCaseImp
+import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.presentation.presenter.GameLogicPresenter
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -17,17 +15,21 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        startKoin{
+        startKoin {
             androidContext(applicationContext)
             modules(module)
         }
     }
 
     // Koinモジュール
-    private val module: Module = module  {
-        factory <GameViewContact.Presenter>{ (v: GameViewContact.View) -> GameLogicPresenter(v,get()) }
-        factory <SyogiLogicUseCase>{ SyogiLogicUseCaseImp(get()) }
-        factory <BoardRepository>{ BoardRepositoryImp() }
+    private val module: Module = module {
+        factory<GameViewContact.Presenter> { (v: GameViewContact.View) ->
+            GameLogicPresenter(
+                v,
+                get()
+            )
+        }
+        factory<SyogiLogicUseCase> { SyogiLogicUseCaseImp() }
     }
 
 

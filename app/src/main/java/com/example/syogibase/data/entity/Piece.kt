@@ -1,7 +1,6 @@
-package com.example.syogibase.data.local
+package com.example.syogibase.data.entity
 
 //将棋の駒格納クラス
-
 
 enum class Piece(val nameJP: String) {
     None(""),

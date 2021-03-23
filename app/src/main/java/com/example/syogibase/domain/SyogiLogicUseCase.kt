@@ -1,9 +1,9 @@
 package com.example.syogibase.domain
 
-import com.example.syogibase.data.local.Cell
-import com.example.syogibase.data.local.GameLog
-import com.example.syogibase.data.local.GameResult
-import com.example.syogibase.data.local.Piece
+import com.example.syogibase.data.entity.Cell
+import com.example.syogibase.data.entity.GameLog
+import com.example.syogibase.data.entity.GameResult
+import com.example.syogibase.data.entity.Piece
 import com.example.syogibase.util.Handicap
 
 interface SyogiLogicUseCase {
@@ -15,6 +15,9 @@ interface SyogiLogicUseCase {
 
     // 駒落ち設定
     fun setHandicap(turn: Int, handicap: Handicap)
+
+    // 持ち駒台設定
+    fun setHoldPiece(holdPiece: MutableMap<Piece, Int>, turn: Int)
 
     // 指定した盤面設定
     fun setBoard(customBoard: Array<Array<Cell>>)
@@ -97,6 +100,9 @@ interface SyogiLogicUseCase {
 
     // 棋譜取得
     fun getGameLog(): List<GameLog>
+
+    // 盤面を初期化する
+    fun resetBoard()
 
     // endregion
 }

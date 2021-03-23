@@ -1,9 +1,9 @@
 package com.example.syogibase.presentation.presenter
 
-import com.example.syogibase.data.local.Board.Companion.COLS
-import com.example.syogibase.data.local.Board.Companion.ROWS
-import com.example.syogibase.data.local.GameLog
-import com.example.syogibase.data.local.GameResult
+import com.example.syogibase.data.entity.Board.Companion.COLS
+import com.example.syogibase.data.entity.Board.Companion.ROWS
+import com.example.syogibase.data.entity.GameLog
+import com.example.syogibase.data.entity.GameResult
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.example.syogibase.util.*
