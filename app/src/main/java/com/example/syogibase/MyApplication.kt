@@ -1,4 +1,4 @@
-package com.example.syogibase.di
+package com.example.syogibase
 
 import android.app.Application
 import com.example.syogibase.domain.SyogiLogicUseCase

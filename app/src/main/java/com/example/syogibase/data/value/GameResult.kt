@@ -1,9 +1,9 @@
-package com.example.syogibase.data.entity
+package com.example.syogibase.data.value
 
 // 判定結果を返すクラス
 sealed class GameResult {
     // 勝ち
-    data class Win(val winner: Int) : GameResult()
+    data class Win(val winner: Turn) : GameResult()
 
     // 引き分け
     object Draw : GameResult()

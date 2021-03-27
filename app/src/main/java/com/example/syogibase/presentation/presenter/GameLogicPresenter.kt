@@ -3,10 +3,15 @@ package com.example.syogibase.presentation.presenter
 import com.example.syogibase.data.entity.Board.Companion.COLS
 import com.example.syogibase.data.entity.Board.Companion.ROWS
 import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.data.entity.GameResult
+import com.example.syogibase.data.entity.Piece
+import com.example.syogibase.data.value.BoardMode
+import com.example.syogibase.data.value.GameResult
+import com.example.syogibase.data.value.Handicap
+import com.example.syogibase.data.value.Turn
+import com.example.syogibase.data.value.Turn.BLACK
+import com.example.syogibase.data.value.Turn.WHITE
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.util.*
 
 class GameLogicPresenter(
     private val view: GameViewContact.View,
@@ -45,13 +50,15 @@ class GameLogicPresenter(
     override fun drawView() {
         view.drawBoard()
         // 盤上
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
+        for (i in 1..COLS) for (j in 1..ROWS) {
             val cell = useCase.getCellInformation(i, j)
-            when (cell.turn) {
-                BLACK -> view.drawBlackPiece(cell.piece.nameJP, (COLS - 1) - i, j)
-                WHITE -> view.drawWhitePiece(cell.piece.nameJP, (COLS - 1) - i, j)
+            cell.piece?.let { piece ->
+                when (cell.turn) {
+                    BLACK -> view.drawBlackPiece(piece.nameJP, COLS - i, j - 1)
+                    WHITE -> view.drawWhitePiece(piece.nameJP, COLS - i, j - 1)
+                }
             }
-            if (cell.hint && isShowHint) view.drawHint((COLS - 1) - i, j)
+            if (cell.hint && isShowHint) view.drawHint(COLS - i, j - 1)
         }
         // 駒台
         if (isVerticalStand) {
@@ -61,32 +68,35 @@ class GameLogicPresenter(
             view.drawHorizontalStand()
         }
         // 持ち駒
-        useCase.getPieceHand(BLACK).forEachIndexed { index, piece ->
-            if (piece.second != 0) {
+        var blackIndex = 0
+        useCase.getPieceHand(BLACK).map {
+            if (it.value != 0) {
                 if (isHorizontalStand) {
-                    val x = index + 2
+                    val x = blackIndex + 2
                     val y = 10
-                    view.drawHoldPieceBlack(piece.first.nameJP, piece.second, x, y)
+                    view.drawHoldPieceBlack(it.key.nameJP, it.value, x, y)
                 } else if (isVerticalStand) {
                     val x = 10
-                    val y = index + 2
-                    view.drawHoldPieceBlack(piece.first.nameJP, piece.second, x, y)
+                    val y = blackIndex + 2
+                    view.drawHoldPieceBlack(it.key.nameJP, it.value, x, y)
                 }
-
             }
+            blackIndex++
         }
-        useCase.getPieceHand(WHITE).forEachIndexed { index, piece ->
-            if (piece.second != 0) {
+        var whiteIndex = 0
+        useCase.getPieceHand(WHITE).map {
+            if (it.value != 0) {
                 if (isHorizontalStand) {
-                    val x = 6 - index
+                    val x = 6 - whiteIndex
                     val y = 0
-                    view.drawHoldPieceWhite(piece.first.nameJP, piece.second, x, y)
+                    view.drawHoldPieceWhite(it.key.nameJP, it.value, x, y)
                 } else if (isVerticalStand) {
                     val x = 0
-                    val y = 6 - index
-                    view.drawHoldPieceWhite(piece.first.nameJP, piece.second, x, y)
+                    val y = 6 - whiteIndex
+                    view.drawHoldPieceWhite(it.key.nameJP, it.value, x, y)
                 }
             }
+            whiteIndex++
         }
     }
 
@@ -108,10 +118,19 @@ class GameLogicPresenter(
             // 左右に駒台が存在
             isVerticalStand && !isHorizontalStand -> {
                 // 持ち駒
-                if (touchX == 0 && touchY in 0..6) {
-                    useCase.setHintHoldPiece(8 - touchY, WHITE_HOLD, useCase.getTurn())
-                } else if (touchX == 10 && touchY in 2..8) {
-                    useCase.setHintHoldPiece(touchY, BLACK_HOLD, useCase.getTurn())
+                val turn = useCase.getTurn()
+                if (touchX == 0 && turn == WHITE) {
+                    changePieceByIndex(8 - touchY)?.let { piece ->
+                        useCase.setHintHoldPiece(piece, turn)
+                    } ?: run {
+                        useCase.cancel()
+                    }
+                } else if (touchX == 10 && turn == BLACK) {
+                    changePieceByIndex(touchY)?.let { piece ->
+                        useCase.setHintHoldPiece(piece, turn)
+                    } ?: run {
+                        useCase.cancel()
+                    }
                 }
                 // 盤上
                 else if (touchX in 1..9 && touchY in 0..8) {
@@ -125,10 +144,19 @@ class GameLogicPresenter(
             // 上下に駒台が存在
             !isVerticalStand && isHorizontalStand -> {
                 // 持ち駒
-                if (touchY == 0 && touchX in 0..6) {
-                    useCase.setHintHoldPiece(8 - touchX, WHITE_HOLD, useCase.getTurn())
-                } else if (touchY == 10 && touchX in 2..8) {
-                    useCase.setHintHoldPiece(touchX, BLACK_HOLD, useCase.getTurn())
+                val turn = useCase.getTurn()
+                if (touchY == 0 && turn == WHITE) {
+                    changePieceByIndex(8 - touchX)?.let { piece ->
+                        useCase.setHintHoldPiece(piece, turn)
+                    } ?: run {
+                        useCase.cancel()
+                    }
+                } else if (touchY == 10 && turn == BLACK) {
+                    changePieceByIndex(touchX)?.let { piece ->
+                        useCase.setHintHoldPiece(piece, turn)
+                    } ?: run {
+                        useCase.cancel()
+                    }
                 }
                 // 盤上
                 else if (touchX in 0..8 && touchY in 1..9) {
@@ -144,8 +172,9 @@ class GameLogicPresenter(
 
     // 盤面タッチイベント
     private fun setBoardTouch(x: Int, y: Int) {
-        when (useCase.getCellTurn(x, y)) {
-            HINT -> {
+        val cell = useCase.getCellInformation(x, y)
+        when {
+            cell.hint -> {
                 useCase.setMove(x, y, false)
                 if (isMoveSound) view.playbackEffect()
                 if (useCase.isSelectEvolution()) {
@@ -154,7 +183,7 @@ class GameLogicPresenter(
                     checkGameEnd()
                 }
             }
-            useCase.getTurn() -> useCase.setTouchHint(x, y)
+            cell.turn == useCase.getTurn() -> useCase.setTouchHint(x, y)
             else -> useCase.cancel()
         }
     }
@@ -162,8 +191,21 @@ class GameLogicPresenter(
     // 終了判定
     override fun checkGameEnd() {
         when (val result = useCase.isGameEnd()) {
-            is GameResult.Draw -> view.gameEnd(0)
+            is GameResult.Draw -> view.gameEnd(null)
             is GameResult.Win -> view.gameEnd(result.winner)
+        }
+    }
+
+    private fun changePieceByIndex(index: Int): Piece? {
+        return when (index) {
+            2 -> Piece.FU
+            3 -> Piece.KYO
+            4 -> Piece.KEI
+            5 -> Piece.GIN
+            6 -> Piece.KIN
+            7 -> Piece.KAKU
+            8 -> Piece.HISYA
+            else -> null
         }
     }
 
@@ -221,7 +263,7 @@ class GameLogicPresenter(
     }
 
     // ハンデ設定
-    override fun setHandicap(turn: Int, handicap: Handicap) {
+    override fun setHandicap(turn: Turn, handicap: Handicap) {
         useCase.setHandicap(turn, handicap)
     }
 

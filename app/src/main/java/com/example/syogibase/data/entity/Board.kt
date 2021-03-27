@@ -3,9 +3,10 @@ package com.example.syogibase.data.entity
 //将棋盤定義クラス
 
 import com.example.syogibase.data.entity.Piece.*
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.Handicap
-import com.example.syogibase.util.WHITE
+import com.example.syogibase.data.value.Handicap
+import com.example.syogibase.data.value.Turn
+import com.example.syogibase.data.value.Turn.BLACK
+import com.example.syogibase.data.value.Turn.WHITE
 
 class Board {
 
@@ -16,7 +17,7 @@ class Board {
     }
 
     // ９×９の将棋盤
-    val cells = Array(COLS) { Array(ROWS) { Cell() } }
+    private val cells = Array(COLS) { Array(ROWS) { Cell() } }
 
 
     //将棋盤の生成
@@ -69,7 +70,7 @@ class Board {
     }
 
     // 駒落ちセット
-    fun setHandicap(turn: Int, handicap: Handicap) {
+    fun setHandicap(turn: Turn, handicap: Handicap) {
         when (turn) {
             BLACK -> {
                 if (handicap == Handicap.HATIMAI) {
@@ -133,12 +134,25 @@ class Board {
     fun getCountByHint(): Int {
         var count = 0
         cells.forEach { count += it.filter { it.hint }.count() }
-
         return count
     }
 
     // 全てのマスのヒントをリセットする
     fun restHintAll() {
         cells.forEach { it.forEach { it.hint = false } }
+    }
+
+    // 指定されたマスの値を取得
+    fun getCell(x: Int, y: Int): Cell {
+        return cells[x - 1][y - 1]
+    }
+
+    // 指定されたマスの値を取得
+    fun setHint(x: Int, y: Int, bool: Boolean) {
+        cells[x - 1][y - 1].hint = bool
+    }
+
+    fun getCells(): Array<Array<Cell>> {
+        return cells
     }
 }

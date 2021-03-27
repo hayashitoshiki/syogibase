@@ -11,9 +11,10 @@ import android.view.View
 import com.example.syogibase.R
 import com.example.syogibase.data.entity.Board.Companion.COLS
 import com.example.syogibase.data.entity.GameLog
+import com.example.syogibase.data.value.BoardMode
+import com.example.syogibase.data.value.Handicap
+import com.example.syogibase.data.value.Turn
 import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.util.BoardMode
-import com.example.syogibase.util.Handicap
 import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -327,7 +328,7 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     }
 
     // 終了ダイアログ表示
-    override fun gameEnd(turn: Int) {
+    override fun gameEnd(turn: Turn?) {
         setBoardMove(BoardMode.REPLAY)
         listener?.onGameEnd(turn)
     }
@@ -381,7 +382,7 @@ class GameView(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
     }
 
     // ハンデ設定
-    fun setHandicap(turn: Int, handicap: Handicap) {
+    fun setHandicap(turn: Turn, handicap: Handicap) {
         presenter.setHandicap(turn, handicap)
     }
 

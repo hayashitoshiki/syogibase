@@ -1,9 +1,10 @@
 package com.example.syogibase.data.entity
 
+import com.example.syogibase.data.value.PieceMove
+
 //将棋の駒格納クラス
 
 enum class Piece(val nameJP: String) {
-    None(""),
     FU("歩"),
     TO("と"),
     KYO("香"),
@@ -23,8 +24,22 @@ enum class Piece(val nameJP: String) {
     // 駒の動き方
     fun getMove(): Array<Array<PieceMove>> {
         when (this) {
-            FU -> return arrayOf(arrayOf(PieceMove(0, -1)))
-            KEI -> return arrayOf(arrayOf(PieceMove(1, -2)), arrayOf(PieceMove(-1, -2)))
+            FU -> return arrayOf(
+                arrayOf(
+                    PieceMove(
+                        0,
+                        -1
+                    )
+                )
+            )
+            KEI -> return arrayOf(
+                arrayOf(
+                    PieceMove(
+                        1,
+                        -2
+                    )
+                ), arrayOf(PieceMove(-1, -2))
+            )
             KYO -> return arrayOf(
                 arrayOf(
                     PieceMove(0, -1),
@@ -38,18 +53,32 @@ enum class Piece(val nameJP: String) {
                 )
             )
             GIN -> return arrayOf(
-                arrayOf(PieceMove(-1, -1)), arrayOf(PieceMove(0, -1)), arrayOf(PieceMove(1, -1)),
-                arrayOf(PieceMove(-1, 1)), arrayOf(PieceMove(1, 1))
+                arrayOf(PieceMove(-1, -1)), arrayOf(
+                    PieceMove(0, -1)
+                ), arrayOf(PieceMove(1, -1)),
+                arrayOf(PieceMove(-1, 1)), arrayOf(
+                    PieceMove(1, 1)
+                )
             )
             KIN, TO, N_KYO, N_KEI, N_GIN -> return arrayOf(
-                arrayOf(PieceMove(-1, -1)), arrayOf(PieceMove(0, -1)), arrayOf(PieceMove(1, -1)),
-                arrayOf(PieceMove(-1, 0)), arrayOf(PieceMove(1, 0)),
+                arrayOf(PieceMove(-1, -1)), arrayOf(
+                    PieceMove(0, -1)
+                ), arrayOf(PieceMove(1, -1)),
+                arrayOf(PieceMove(-1, 0)), arrayOf(
+                    PieceMove(1, 0)
+                ),
                 arrayOf(PieceMove(0, 1))
             )
             OU, GYOKU -> return arrayOf(
-                arrayOf(PieceMove(-1, -1)), arrayOf(PieceMove(-1, 0)), arrayOf(PieceMove(-1, 1)),
-                arrayOf(PieceMove(0, -1)), arrayOf(PieceMove(0, 1)),
-                arrayOf(PieceMove(1, -1)), arrayOf(PieceMove(1, 0)), arrayOf(PieceMove(1, 1))
+                arrayOf(PieceMove(-1, -1)), arrayOf(
+                    PieceMove(-1, 0)
+                ), arrayOf(PieceMove(-1, 1)),
+                arrayOf(PieceMove(0, -1)), arrayOf(
+                    PieceMove(0, 1)
+                ),
+                arrayOf(PieceMove(1, -1)), arrayOf(
+                    PieceMove(1, 0)
+                ), arrayOf(PieceMove(1, 1))
             )
             HISYA -> return arrayOf(
                 arrayOf(
@@ -227,7 +256,14 @@ enum class Piece(val nameJP: String) {
                 arrayOf(PieceMove(0, -1)),
                 arrayOf(PieceMove(0, 1))
             )
-            else -> return arrayOf(arrayOf(PieceMove(0, 0)))
+            else -> return arrayOf(
+                arrayOf(
+                    PieceMove(
+                        0,
+                        0
+                    )
+                )
+            )
         }
     }
 
@@ -256,12 +292,11 @@ enum class Piece(val nameJP: String) {
             KIN -> KIN
             OU -> OU
             GYOKU -> GYOKU
-            else -> this
         }
     }
 
     // 成れる駒の分類
-    fun findEvolution(): Boolean {
+    fun isEvolution(): Boolean {
         return when (this) {
             FU, KEI, KYO, GIN, HISYA, KAKU -> true
             else -> false
@@ -269,7 +304,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 上へ動ける駒
-    fun equalUpMovePiece(): Boolean {
+    fun isUpMovePiece(): Boolean {
         return when (this) {
             FU, TO, KYO, N_KYO, GIN, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
             else -> false
@@ -277,7 +312,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 下へ動ける駒
-    fun equalDownMovePiece(): Boolean {
+    fun isDownMovePiece(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
             else -> false
@@ -285,7 +320,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 横へ動ける駒
-    fun equalLRMovePiece(): Boolean {
+    fun isLRMovePiece(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
             else -> false
@@ -293,7 +328,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 横へ2マス以上動ける駒
-    fun equalLongLRMovePiece(): Boolean {
+    fun isLongLRMovePiece(): Boolean {
         return when (this) {
             HISYA, RYU -> true
             else -> false
@@ -301,7 +336,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 斜め上へ動ける駒
-    fun equalDiagonalUp(): Boolean {
+    fun isDiagonalUp(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, GIN, KIN, OU, GYOKU, KAKU, RYU, UMA -> true
             else -> false
@@ -309,7 +344,7 @@ enum class Piece(val nameJP: String) {
     }
 
     // 斜め下へ動ける駒
-    fun equalDiagonalDown(): Boolean {
+    fun isDiagonalDown(): Boolean {
         return when (this) {
             GIN, OU, GYOKU, KAKU, RYU, UMA -> true
             else -> false

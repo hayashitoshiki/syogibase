@@ -1,14 +1,15 @@
 package com.example.syogibase.presentation.contact
 
 import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.util.BoardMode
-import com.example.syogibase.util.Handicap
+import com.example.syogibase.data.value.BoardMode
+import com.example.syogibase.data.value.Handicap
+import com.example.syogibase.data.value.Turn
 
 interface GameViewContact {
 
     interface GameEndListener {
         // 対局終了通知リスナー
-        fun onGameEnd(winner: Int)
+        fun onGameEnd(winner: Turn?)
     }
 
     interface View {
@@ -43,7 +44,7 @@ interface GameViewContact {
         fun showDialog()
 
         // 対局終了ダイアログ生成
-        fun gameEnd(turn: Int)
+        fun gameEnd(turn: Turn?)
 
         // 駒音再生
         fun playbackEffect()
@@ -105,7 +106,7 @@ interface GameViewContact {
         fun reset()
 
         // 駒落ち設定
-        fun setHandicap(turn: Int, handicap: Handicap)
+        fun setHandicap(turn: Turn, handicap: Handicap)
 
         // 駒音有効設定
         fun setEnableTouchSound(enable: Boolean)

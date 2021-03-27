@@ -4,11 +4,12 @@ import com.example.syogibase.data.entity.Board
 import com.example.syogibase.data.entity.Board.Companion.COLS
 import com.example.syogibase.data.entity.Board.Companion.ROWS
 import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.data.entity.GameResult
 import com.example.syogibase.data.entity.Piece
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.BLACK_HOLD
-import com.example.syogibase.util.WHITE
+import com.example.syogibase.data.value.GameResult
+import com.example.syogibase.data.value.Turn.BLACK
+import com.example.syogibase.data.value.Turn.WHITE
+import com.example.syogibase.data.value.X
+import com.example.syogibase.data.value.Y
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -35,6 +36,19 @@ class SyogiLogicUseCaseTest {
 
     // からのボードを設定
     private val board = Board()
+    private lateinit var useCase: SyogiLogicUseCaseImp
+
+    // ヒントカウント取得
+    private fun findHintCount(): Int {
+        var hintCount = 0
+        for (i in 1..COLS) for (j in 1..ROWS) {
+            val cell = useCase.getCellInformation(i, j)
+            if (cell.hint) {
+                hintCount++
+            }
+        }
+        return hintCount
+    }
 
     // region 詰み判定
 
@@ -45,10 +59,10 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteEscapeTrue() {
-        board.cells[4][1].setPiece(Piece.OU, WHITE)
-        board.cells[4][2].setPiece(Piece.KIN, BLACK)
-        board.cells[4][3].setPiece(Piece.KIN, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 2).setPiece(Piece.OU, WHITE)
+        board.getCell(5, 3).setPiece(Piece.KIN, BLACK)
+        board.getCell(5, 4).setPiece(Piece.KIN, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Continue)
     }
@@ -60,10 +74,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteEscapeFalse() {
-        board.cells[4][0].setPiece(Piece.OU, WHITE)
-        board.cells[4][1].setPiece(Piece.KIN, BLACK)
-        board.cells[4][2].setPiece(Piece.KIN, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 1).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(5, 2).setPiece(Piece.KIN, BLACK)
+        board.getCell(5, 3).setPiece(Piece.KIN, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Win(BLACK))
     }
@@ -75,11 +90,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteMoveTrue() {
-        board.cells[0][0].setPiece(Piece.OU, WHITE)
-        board.cells[1][0].setPiece(Piece.KYO, WHITE)
-        board.cells[1][1].setPiece(Piece.KIN, WHITE)
-        board.cells[4][2].setPiece(Piece.KYO, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(2, 1).setPiece(Piece.KYO, WHITE)
+        board.getCell(2, 2).setPiece(Piece.KIN, WHITE)
+        board.getCell(5, 3).setPiece(Piece.KYO, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Continue)
     }
@@ -91,12 +106,13 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteMoveFalse() {
-        board.cells[0][0].setPiece(Piece.OU, WHITE)
-        board.cells[1][0].setPiece(Piece.KYO, WHITE)
-        board.cells[1][1].setPiece(Piece.KIN, WHITE)
-        board.cells[0][3].setPiece(Piece.KYO, BLACK)
-        board.cells[3][3].setPiece(Piece.KAKU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(1, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(2, 1).setPiece(Piece.KYO, WHITE)
+        board.getCell(2, 2).setPiece(Piece.KIN, WHITE)
+        board.getCell(1, 4).setPiece(Piece.KYO, BLACK)
+        board.getCell(4, 4).setPiece(Piece.KAKU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Win(BLACK))
     }
@@ -108,12 +124,12 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteTakeTrue() {
-        board.cells[0][0].setPiece(Piece.OU, WHITE)
-        board.cells[0][1].setPiece(Piece.KYO, WHITE)
-        board.cells[1][0].setPiece(Piece.KEI, WHITE)
-        board.cells[1][1].setPiece(Piece.KIN, WHITE)
-        board.cells[0][2].setPiece(Piece.KYO, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(1, 2).setPiece(Piece.KYO, WHITE)
+        board.getCell(2, 1).setPiece(Piece.KEI, WHITE)
+        board.getCell(2, 2).setPiece(Piece.KIN, WHITE)
+        board.getCell(1, 3).setPiece(Piece.KYO, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Continue)
     }
@@ -125,13 +141,13 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteTakeFalse() {
-        board.cells[0][0].setPiece(Piece.GYOKU, WHITE)
-        board.cells[0][1].setPiece(Piece.KYO, WHITE)
-        board.cells[1][0].setPiece(Piece.KEI, WHITE)
-        board.cells[1][1].setPiece(Piece.KEI, WHITE)
-        board.cells[1][2].setPiece(Piece.KEI, BLACK)
-        board.cells[3][3].setPiece(Piece.KAKU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 1).setPiece(Piece.GYOKU, WHITE)
+        board.getCell(1, 2).setPiece(Piece.KYO, WHITE)
+        board.getCell(2, 1).setPiece(Piece.KEI, WHITE)
+        board.getCell(2, 2).setPiece(Piece.KEI, WHITE)
+        board.getCell(2, 3).setPiece(Piece.KEI, BLACK)
+        board.getCell(4, 4).setPiece(Piece.KAKU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Win(BLACK))
     }
@@ -143,11 +159,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateWhiteHandPiece() {
-        board.cells[0][0].setPiece(Piece.GYOKU, WHITE)
-        board.cells[1][0].setPiece(Piece.KYO, WHITE)
-        board.cells[1][1].setPiece(Piece.KYO, WHITE)
-        board.cells[0][2].setPiece(Piece.KYO, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 1).setPiece(Piece.GYOKU, WHITE)
+        board.getCell(2, 1).setPiece(Piece.KYO, WHITE)
+        board.getCell(2, 2).setPiece(Piece.KYO, WHITE)
+        board.getCell(1, 3).setPiece(Piece.KYO, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, WHITE)
         val result = useCase.isGameEnd()
         assertEquals(result, GameResult.Continue)
@@ -160,10 +176,10 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackEscapeTrue() {
-        board.cells[4][7].setPiece(Piece.OU, BLACK)
-        board.cells[4][6].setPiece(Piece.KIN, WHITE)
-        board.cells[4][5].setPiece(Piece.KIN, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 8).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 7).setPiece(Piece.KIN, WHITE)
+        board.getCell(5, 6).setPiece(Piece.KIN, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -178,14 +194,15 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackEscapeFalse() {
-        board.cells[4][8].setPiece(Piece.OU, BLACK)
-        board.cells[4][7].setPiece(Piece.KIN, WHITE)
-        board.cells[4][6].setPiece(Piece.KIN, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 8).setPiece(Piece.KIN, WHITE)
+        board.getCell(5, 7).setPiece(Piece.KIN, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
-        val log = mutableListOf(GameLog(4, 7, Piece.KIN, WHITE, 4, 7, Piece.None, 0, false))
+        val log =
+            mutableListOf(GameLog(X(4), Y(7), Piece.KIN, WHITE, X(4), Y(7), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -200,11 +217,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackMoveTrue() {
-        board.cells[0][8].setPiece(Piece.OU, BLACK)
-        board.cells[1][8].setPiece(Piece.KYO, BLACK)
-        board.cells[1][7].setPiece(Piece.KIN, BLACK)
-        board.cells[4][6].setPiece(Piece.KYO, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(2, 9).setPiece(Piece.KYO, BLACK)
+        board.getCell(2, 8).setPiece(Piece.KIN, BLACK)
+        board.getCell(5, 7).setPiece(Piece.KYO, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -219,12 +236,12 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackMoveFalse() {
-        board.cells[0][8].setPiece(Piece.OU, BLACK)
-        board.cells[1][8].setPiece(Piece.KYO, BLACK)
-        board.cells[1][7].setPiece(Piece.KIN, BLACK)
-        board.cells[0][5].setPiece(Piece.KYO, WHITE)
-        board.cells[3][5].setPiece(Piece.KAKU, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(2, 9).setPiece(Piece.KYO, BLACK)
+        board.getCell(2, 8).setPiece(Piece.KIN, BLACK)
+        board.getCell(1, 6).setPiece(Piece.KYO, WHITE)
+        board.getCell(4, 6).setPiece(Piece.KAKU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -239,13 +256,13 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackTakeTrue() {
-        board.cells[0][8].setPiece(Piece.OU, BLACK)
-        board.cells[0][7].setPiece(Piece.KYO, BLACK)
-        board.cells[1][8].setPiece(Piece.KEI, BLACK)
-        board.cells[1][7].setPiece(Piece.KIN, BLACK)
-        board.cells[1][6].setPiece(Piece.KEI, WHITE)
-        board.cells[8][0].setPiece(Piece.GYOKU, WHITE)
-        val useCase = SyogiLogicUseCaseImp()
+        board.getCell(1, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(1, 8).setPiece(Piece.KYO, BLACK)
+        board.getCell(2, 9).setPiece(Piece.KEI, BLACK)
+        board.getCell(2, 8).setPiece(Piece.KIN, BLACK)
+        board.getCell(2, 7).setPiece(Piece.KEI, WHITE)
+        board.getCell(9, 1).setPiece(Piece.GYOKU, WHITE)
+        useCase = SyogiLogicUseCaseImp()
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -260,13 +277,13 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackTakeFalse() {
-        board.cells[0][8].setPiece(Piece.GYOKU, BLACK)
-        board.cells[0][7].setPiece(Piece.KYO, BLACK)
-        board.cells[1][8].setPiece(Piece.KEI, BLACK)
-        board.cells[1][7].setPiece(Piece.GIN, BLACK)
-        board.cells[1][6].setPiece(Piece.KEI, WHITE)
-        board.cells[3][5].setPiece(Piece.KAKU, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 9).setPiece(Piece.GYOKU, BLACK)
+        board.getCell(1, 8).setPiece(Piece.KYO, BLACK)
+        board.getCell(2, 9).setPiece(Piece.KEI, BLACK)
+        board.getCell(2, 8).setPiece(Piece.GIN, BLACK)
+        board.getCell(2, 7).setPiece(Piece.KEI, WHITE)
+        board.getCell(4, 6).setPiece(Piece.KAKU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -281,11 +298,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isCheckmateBlackHandPiece() {
-        board.cells[0][8].setPiece(Piece.GYOKU, BLACK)
-        board.cells[1][8].setPiece(Piece.KYO, BLACK)
-        board.cells[1][7].setPiece(Piece.KYO, BLACK)
-        board.cells[0][6].setPiece(Piece.KYO, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 9).setPiece(Piece.GYOKU, BLACK)
+        board.getCell(2, 9).setPiece(Piece.KYO, BLACK)
+        board.getCell(2, 8).setPiece(Piece.KYO, BLACK)
+        board.getCell(1, 7).setPiece(Piece.KYO, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
@@ -304,17 +321,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setTouchHintCenter() {
-        board.cells[4][4].setPiece(Piece.OU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 5).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         useCase.setTouchHint(5, 5)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        val hintCount = findHintCount()
         assertEquals(hintCount, 8)
     }
 
@@ -325,17 +336,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setTouchHintTop() {
-        board.cells[8][0].setPiece(Piece.OU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(9, 1).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         useCase.setTouchHint(9, 1)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        val hintCount = findHintCount()
         assertEquals(hintCount, 3)
     }
 
@@ -346,17 +351,11 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setTouchHintBottom() {
-        board.cells[8][8].setPiece(Piece.OU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(9, 9).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         useCase.setTouchHint(9, 9)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        val hintCount = findHintCount()
         assertEquals(hintCount, 3)
     }
 
@@ -367,25 +366,19 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setTouchHintCenter2() {
-        board.cells[3][3].setPiece(Piece.FU, BLACK)
-        board.cells[3][4].setPiece(Piece.KIN, BLACK)
-        board.cells[3][5].setPiece(Piece.GIN, BLACK)
-        board.cells[4][3].setPiece(Piece.FU, BLACK)
-        board.cells[4][4].setPiece(Piece.OU, BLACK)
-        board.cells[4][5].setPiece(Piece.KEI, BLACK)
-        board.cells[5][3].setPiece(Piece.FU, BLACK)
-        board.cells[5][4].setPiece(Piece.KIN, BLACK)
-        board.cells[5][5].setPiece(Piece.GIN, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(4, 4).setPiece(Piece.FU, BLACK)
+        board.getCell(4, 5).setPiece(Piece.KIN, BLACK)
+        board.getCell(4, 6).setPiece(Piece.GIN, BLACK)
+        board.getCell(5, 4).setPiece(Piece.FU, BLACK)
+        board.getCell(5, 5).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 6).setPiece(Piece.KEI, BLACK)
+        board.getCell(6, 4).setPiece(Piece.FU, BLACK)
+        board.getCell(6, 5).setPiece(Piece.KIN, BLACK)
+        board.getCell(6, 6).setPiece(Piece.GIN, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         useCase.setTouchHint(5, 5)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        val hintCount = findHintCount()
         assertEquals(hintCount, 0)
     }
 
@@ -397,21 +390,15 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun setTouchHintCenter3() {
-        board.cells[4][2].setPiece(Piece.KEI, WHITE)
-        board.cells[4][4].setPiece(Piece.OU, BLACK)
-        board.cells[2][3].setPiece(Piece.HISYA, WHITE)
-        board.cells[4][6].setPiece(Piece.KAKU, WHITE)
-        board.cells[5][6].setPiece(Piece.GIN, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 3).setPiece(Piece.KEI, WHITE)
+        board.getCell(5, 5).setPiece(Piece.OU, BLACK)
+        board.getCell(3, 4).setPiece(Piece.HISYA, WHITE)
+        board.getCell(5, 7).setPiece(Piece.KAKU, WHITE)
+        board.getCell(6, 7).setPiece(Piece.GIN, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         useCase.setTouchHint(5, 5)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        val hintCount = findHintCount()
         assertEquals(hintCount, 0)
     }
 
@@ -421,221 +408,176 @@ class SyogiLogicUseCaseTest {
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；歩をタップした場合
-     * 結果：72回useCaseのsetHint()が呼ばれる
+     * 結果：71マス置くことができる
      */
     @Test
     fun getHintHoldPieceFU() {
-        board.cells[5][5].setPiece(Piece.OU, WHITE)
-        board.cells[1][1].setPiece(Piece.GIN, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(2, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 70)
+        useCase.setHintHoldPiece(Piece.FU, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 71)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；全ての行に歩がある時に歩をタップした場合
-     * 結果：0回useCaseのsetHint()が呼ばれる
+     * 結果：１マスも置くことができない
      */
     @Test
     fun getHintHoldPieceFU2() {
-        board.cells[0][1].setPiece(Piece.FU, BLACK)
-        board.cells[1][1].setPiece(Piece.FU, BLACK)
-        board.cells[2][2].setPiece(Piece.FU, BLACK)
-        board.cells[3][3].setPiece(Piece.FU, BLACK)
-        board.cells[4][4].setPiece(Piece.FU, BLACK)
-        board.cells[5][5].setPiece(Piece.FU, BLACK)
-        board.cells[6][6].setPiece(Piece.FU, BLACK)
-        board.cells[7][7].setPiece(Piece.FU, BLACK)
-        board.cells[8][8].setPiece(Piece.FU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(1, 2).setPiece(Piece.FU, BLACK)
+        board.getCell(2, 2).setPiece(Piece.FU, BLACK)
+        board.getCell(3, 3).setPiece(Piece.FU, BLACK)
+        board.getCell(4, 4).setPiece(Piece.FU, BLACK)
+        board.getCell(5, 5).setPiece(Piece.FU, BLACK)
+        board.getCell(6, 6).setPiece(Piece.FU, BLACK)
+        board.getCell(7, 7).setPiece(Piece.FU, BLACK)
+        board.getCell(8, 8).setPiece(Piece.FU, BLACK)
+        board.getCell(9, 9).setPiece(Piece.FU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
-        useCase.setHintHoldPiece(2, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        useCase.setHintHoldPiece(Piece.FU, BLACK)
+        val hintCount = findHintCount()
         assertEquals(hintCount, 0)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；金をタップした場合
-     * 結果：79回useCaseのsetHint()が呼ばれる
+     * 結果：79マス置くことができる
      */
     @Test
     fun getHintHoldPieceOther() {
-        board.cells[5][5].setPiece(Piece.OU, BLACK)
-        board.cells[1][1].setPiece(Piece.GIN, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.GIN, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        useCase.setHintHoldPiece(Piece.KIN, BLACK)
+        val hintCount = findHintCount()
         assertEquals(hintCount, 79)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；香車をタップした場合
-     * 結果：63回useCaseのsetHint()が呼ばれる
+     * 結果：71回マス置くことができる
      */
     @Test
     fun getHintHoldPieceKYO() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(3, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 72)
+        useCase.setHintHoldPiece(Piece.KYO, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 71)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；桂馬をタップした場合
-     * 結果：63回useCaseのsetHint()が呼ばれる
+     * 結果：62マス置くことができる
      */
     @Test
     fun getHintHoldPieceKEI() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(4, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 63)
+        useCase.setHintHoldPiece(Piece.KEI, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 62)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；銀をタップした場合
-     * 結果：81回useCaseのsetHint()が呼ばれる
+     * 結果：79マス置くことができる
      */
     @Test
     fun getHintHoldPieceGIN() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 81)
+        useCase.setHintHoldPiece(Piece.GIN, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 79)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；金をタップした場合
-     * 結果：81回useCaseのsetHint()が呼ばれる
+     * 結果：79マス置くことができる
+     *
      */
     @Test
     fun getHintHoldPieceKIN() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 81)
+        useCase.setHintHoldPiece(Piece.KIN, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 79)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；飛車をタップした場合
-     * 結果：81回useCaseのsetHint()が呼ばれる
+     * 結果：79マス置くことができる
      */
     @Test
     fun getHintHoldPieceHISYA() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 81)
+        useCase.setHintHoldPiece(Piece.HISYA, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 79)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；角をタップした場合
-     * 結果：81回useCaseのsetHint()が呼ばれる
+     * 結果：79マス置くことができる
      */
     @Test
     fun getHintHoldPieceKAKU() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         useCase.setHoldPiece(holdPiece, BLACK)
         // 実行
-        useCase.setHintHoldPiece(5, BLACK_HOLD, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
-        assertEquals(hintCount, 81)
+        useCase.setHintHoldPiece(Piece.KAKU, BLACK)
+        val hintCount = findHintCount()
+        assertEquals(hintCount, 79)
     }
 
     /**
      * 持ち駒の打てる場所判定関数
      * 条件；空をタップした場合
-     * 結果：0回useCaseのsetHint()が呼ばれる
+     * 結果：１マスも置くことができない
      */
     @Test
     fun getHintHoldPieceNone() {
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, BLACK)
+        board.getCell(5, 1).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
-        useCase.setHintHoldPiece(5, 10, BLACK)
-        var hintCount = 0
-        for (i in 0 until COLS) for (j in 0 until ROWS) {
-            val cell = useCase.getCellInformation(i, j)
-            if (cell.hint) {
-                hintCount++
-            }
-        }
+        useCase.setHintHoldPiece(Piece.KIN, BLACK)
+        val hintCount = findHintCount()
         assertEquals(hintCount, 0)
     }
 
@@ -644,27 +586,28 @@ class SyogiLogicUseCaseTest {
     // region 駒を動かす
     /**
      * 駒を動かす関数
-     * 結果：下記のメソッドを呼ぶ
-     * ・駒を動かすBoardRepositoryメソッド
-     * ・持ち駒をセットするBoardRepositoryメソッド
-     * ・ヒントをリセットするメソッド
+     * 結果：3三に金が設定されていること
      */
     @Test
     fun setMove() {
-        val useCase = SyogiLogicUseCaseImp()
+        board.getCell(2, 2).setPiece(Piece.OU, BLACK)
+        board.getCell(4, 3).setPiece(Piece.KIN, BLACK)
+        board.getCell(9, 9).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val previousX: Field = useCase.javaClass.getDeclaredField("previousX")
         previousX.isAccessible = true
-        previousX.set(useCase, 1)
+        previousX.set(useCase, 4)
         val previousY: Field = useCase.javaClass.getDeclaredField("previousY")
         previousY.isAccessible = true
-        previousY.set(useCase, 1)
+        previousY.set(useCase, 3)
         val previousPiece: Field = useCase.javaClass.getDeclaredField("previousPiece")
         previousPiece.isAccessible = true
-        previousPiece.set(useCase, Piece.FU)
+        previousPiece.set(useCase, Piece.KIN)
         // 実行
         useCase.setMove(3, 3, false)
-        val cell = useCase.getCellInformation(2, 2)
-        assertEquals(cell.piece, Piece.FU)
+        val cell = useCase.getCellInformation(3, 3)
+        assertEquals(cell.piece, Piece.KIN)
+        assertEquals(cell.turn, BLACK)
     }
 
     // endregion
@@ -679,8 +622,9 @@ class SyogiLogicUseCaseTest {
     @Test
     fun evolutionCheckBlackByUpY() {
         // テストクラス作成
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(2, 7, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(2), Y(7), Piece.HISYA, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -696,9 +640,10 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckBlackByDownY() {
-        board.cells[2][7].setPiece(Piece.HISYA, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
-        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, BLACK, 2, 7, Piece.None, 0, false))
+        board.getCell(2, 7).setPiece(Piece.HISYA, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
+        val log =
+            mutableListOf(GameLog(X(2), Y(3), Piece.HISYA, BLACK, X(2), Y(7), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -714,8 +659,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckBlackByStayY1() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(7, 2, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(7), Y(2), Piece.HISYA, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -731,8 +677,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckBlackByStayY2() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(7, 6, Piece.HISYA, BLACK, 2, 6, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(7), Y(6), Piece.HISYA, BLACK, X(2), Y(6), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -748,8 +695,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckWhiteByUpY() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, WHITE, 2, 6, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(2), Y(3), Piece.HISYA, WHITE, X(2), Y(7), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -768,8 +716,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckWhiteByDownY() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(2, 7, Piece.HISYA, WHITE, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(2), Y(7), Piece.HISYA, WHITE, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -788,8 +737,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckWhiteByStayY1() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(2, 2, Piece.HISYA, WHITE, 7, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(2), Y(2), Piece.HISYA, WHITE, X(7), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -808,8 +758,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun evolutionCheckWhiteByStayY2() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(2, 6, Piece.HISYA, WHITE, 7, 6, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(2), Y(7), Piece.HISYA, WHITE, X(7), Y(7), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -828,8 +779,8 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckFU() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.FU, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log = mutableListOf(GameLog(X(6), Y(2), Piece.FU, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -845,8 +796,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKYO1() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.KYO, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.KYO, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -862,8 +814,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKYO2() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.KYO, BLACK, 2, 1, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.KYO, BLACK, X(2), Y(1), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -879,8 +832,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKEI1() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.KEI, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.KEI, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -896,8 +850,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKEI2() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.KEI, BLACK, 2, 1, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.KEI, BLACK, X(2), Y(1), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -913,8 +868,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckGIN() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.GIN, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.GIN, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -930,8 +886,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKIN() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(6, 2, Piece.KIN, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(6), Y(2), Piece.KIN, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -948,8 +905,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckHISYA() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(7, 2, Piece.HISYA, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(7), Y(2), Piece.HISYA, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -965,8 +923,9 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckKAKU() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(7, 2, Piece.KAKU, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log =
+            mutableListOf(GameLog(X(7), Y(2), Piece.KAKU, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
@@ -983,105 +942,14 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun compulsionEvolutionCheckOU() {
-        val useCase = SyogiLogicUseCaseImp()
-        val log = mutableListOf(GameLog(7, 2, Piece.OU, BLACK, 2, 2, Piece.None, 0, false))
+        useCase = SyogiLogicUseCaseImp()
+        val log = mutableListOf(GameLog(X(7), Y(2), Piece.OU, BLACK, X(2), Y(2), null, null, false))
         val logList: Field = useCase.javaClass.getDeclaredField("logList")
         logList.isAccessible = true
         logList.set(useCase, log)
         // 実行
         val result = useCase.isCompulsionEvolution()
         assertEquals(result, false)
-    }
-
-    // endregion
-
-    // region 指定したますの情報取得
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：自分の駒あり、ヒントなしのマスを検索する
-     * 結果；手番＝自分、が返る
-     */
-    @Test
-    fun getCellTurnBLACKNoHint() {
-        board.cells[4][4].setPiece(Piece.FU, BLACK)
-        board.cells[4][4].hint = false
-        val useCase = SyogiLogicUseCaseImp(board)
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 1)
-    }
-
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：自分の駒あり、ヒントなしのマスを検索する
-     * 結果；手番＝ヒント、が返る
-     */
-    @Test
-    fun getCellTurnBLACKAndHint() {
-        board.cells[4][4].setPiece(Piece.FU, BLACK)
-        board.cells[4][4].hint = true
-        val useCase = SyogiLogicUseCaseImp(board)
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 3)
-    }
-
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：自分の駒あり、ヒントなしのマスを検索する
-     * 結果；手番＝自分、が返る
-     */
-    @Test
-    fun getCellTurnWHITENoHint() {
-        board.cells[4][4].setPiece(Piece.FU, WHITE)
-        board.cells[4][4].hint = false
-        val useCase = SyogiLogicUseCaseImp(board)
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 2)
-    }
-
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：相手の駒あり、ヒントなしのマスを検索する
-     * 結果；手番＝ヒント、が返る
-     */
-    @Test
-    fun getCellTurnWHITEAndHint() {
-        board.cells[4][4].setPiece(Piece.FU, WHITE)
-        board.cells[4][4].hint = true
-        val useCase = SyogiLogicUseCaseImp(board)
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 3)
-    }
-
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：駒なし、ヒントなしのマスを検索する
-     * 結果；手番＝なし、が返る
-     */
-    @Test
-    fun getCellTurnNoneNoHint() {
-        val useCase = SyogiLogicUseCaseImp()
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 4)
-    }
-
-    /**
-     * 指定したマスの手番情報を返す関数
-     * 条件：駒なし、ヒントなしのマスを検索する
-     * 結果；手番＝なし、が返る
-     */
-    @Test
-    fun getCellTurnNoneAndHint() {
-        board.cells[4][4].setNone()
-        board.cells[4][4].hint = false
-        val useCase = SyogiLogicUseCaseImp(board)
-        // 実行
-        val result = useCase.getCellTurn(5, 5)
-        assertEquals(result, 4)
     }
 
     // endregion
@@ -1094,8 +962,17 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isRepetitionMoveTrue() {
-        val useCase = SyogiLogicUseCaseImp()
+        useCase = SyogiLogicUseCaseImp()
         // 実行
+        val previousX: Field = useCase.javaClass.getDeclaredField("previousX")
+        previousX.isAccessible = true
+        previousX.set(useCase, 3)
+        val previousY: Field = useCase.javaClass.getDeclaredField("previousY")
+        previousY.isAccessible = true
+        previousY.set(useCase, 2)
+        val previousPiece: Field = useCase.javaClass.getDeclaredField("previousPiece")
+        previousPiece.isAccessible = true
+        previousPiece.set(useCase, Piece.KIN)
         useCase.setMove(3, 3, false)
         useCase.setMove(3, 3, false)
         useCase.setMove(3, 3, false)
@@ -1111,7 +988,7 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isRepetitionMoveFalse() {
-        val useCase = SyogiLogicUseCaseImp()
+        useCase = SyogiLogicUseCaseImp()
         // 実行
         useCase.setMove(3, 3, false)
         useCase.setMove(3, 3, false)
@@ -1130,8 +1007,8 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isTryKingBlackTrue() {
-        board.cells[4][0].setPiece(Piece.OU, BLACK)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 1).setPiece(Piece.OU, BLACK)
+        useCase = SyogiLogicUseCaseImp(board)
         // 実行
         val result = useCase.isTryKing()
         assertEquals(result, true)
@@ -1144,7 +1021,7 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isTryKingBlackFalse() {
-        val useCase = SyogiLogicUseCaseImp()
+        useCase = SyogiLogicUseCaseImp()
         // 実行
         val result = useCase.isTryKing()
         assertEquals(result, false)
@@ -1157,8 +1034,8 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isTryKingWhiteTrue() {
-        board.cells[4][8].setPiece(Piece.OU, WHITE)
-        val useCase = SyogiLogicUseCaseImp(board)
+        board.getCell(5, 9).setPiece(Piece.OU, WHITE)
+        useCase = SyogiLogicUseCaseImp(board)
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)
@@ -1174,7 +1051,7 @@ class SyogiLogicUseCaseTest {
      */
     @Test
     fun isTryKingWhiteFalse() {
-        val useCase = SyogiLogicUseCaseImp()
+        useCase = SyogiLogicUseCaseImp()
         val turn: Field = useCase.javaClass.getDeclaredField("turn")
         turn.isAccessible = true
         turn.set(useCase, WHITE)

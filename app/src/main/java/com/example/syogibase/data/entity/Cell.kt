@@ -1,29 +1,31 @@
 package com.example.syogibase.data.entity
 
+import com.example.syogibase.data.value.Turn
+
 //１マスの情報クラス
 
 class Cell {
 
-    var piece: Piece = Piece.None
+    var piece: Piece? = null
         private set
 
-    var turn: Int? = null
+    var turn: Turn? = null
         private set
 
     var hint: Boolean = false
 
-    fun setPiece(piece: Piece, turn: Int) {
+    fun setPiece(piece: Piece, turn: Turn) {
         this.piece = piece
         this.turn = turn
     }
 
     fun setNone() {
-        piece = Piece.None
+        piece = null
         turn = null
     }
 
     fun clear() {
-        piece = Piece.None
+        piece = null
         turn = null
         hint = false
     }

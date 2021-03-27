@@ -1,13 +1,13 @@
 package com.example.syogibase.presentation.presenter
 
+import com.example.syogibase.data.entity.Cell
 import com.example.syogibase.data.entity.Piece
+import com.example.syogibase.data.value.BoardMode
+import com.example.syogibase.data.value.Turn.BLACK
+import com.example.syogibase.data.value.Turn.WHITE
 import com.example.syogibase.domain.SyogiLogicUseCase
 import com.example.syogibase.domain.SyogiLogicUseCaseImp
 import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.util.BLACK
-import com.example.syogibase.util.BoardMode
-import com.example.syogibase.util.HINT
-import com.example.syogibase.util.WHITE
 import com.nhaarman.mockito_kotlin.*
 import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
@@ -80,14 +80,8 @@ class GameLogicPresenterTest {
             Piece.KAKU to 1,
             Piece.HISYA to 1
         )
-        val hold = mutableListOf<Pair<Piece, Int>>()
-        var i = 0
-        holdPiece.forEach { (piece, count) ->
-            hold.add(i, Pair(piece, count))
-            i++
-        }
         val useCase = spy(SyogiLogicUseCaseImp())
-        doReturn(hold).whenever(useCase).getPieceHand(BLACK)
+        doReturn(holdPiece).whenever(useCase).getPieceHand(BLACK)
         useCase.getPieceHand(BLACK)
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
@@ -120,14 +114,8 @@ class GameLogicPresenterTest {
             Piece.KAKU to 1,
             Piece.HISYA to 1
         )
-        val hold = mutableListOf<Pair<Piece, Int>>()
-        var i = 0
-        holdPiece.forEach { (piece, count) ->
-            hold.add(i, Pair(piece, count))
-            i++
-        }
         val useCase = spy(SyogiLogicUseCaseImp())
-        doReturn(hold).whenever(useCase).getPieceHand(WHITE)
+        doReturn(holdPiece).whenever(useCase).getPieceHand(WHITE)
         useCase.getPieceHand(WHITE)
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
@@ -242,6 +230,7 @@ class GameLogicPresenterTest {
         verify(view, times(1)).onTouchEventByReplayMode(anyInt(), anyInt())
     }
 
+    // region 感想戦モード
     /**
      * 感想戦モードでのタッチイベント
      * 条件：感想戦モードで画面左側をタッチ（タッチダウン）
@@ -303,6 +292,11 @@ class GameLogicPresenterTest {
         verify(view, times(1)).cancelLongJob()
     }
 
+    // endregion
+
+    // region 対局モード
+
+    // region 駒台が上下にある場合
 
     /**
      * 対局モードでのタッチイベント
@@ -313,7 +307,10 @@ class GameLogicPresenterTest {
      */
     @Test
     fun onTouchBoardByGameModeAndHorizontalStand() {
-        val useCase = mock<SyogiLogicUseCase> {}
+        val cell = Cell()
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
+        }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
@@ -330,39 +327,17 @@ class GameLogicPresenterTest {
 
     /**
      * 対局モードでのタッチイベント
-     * 条件：左右に駒台が存在する状態で盤上81マスをタッチ(1回目)
-     * 期待値：
-     * ・１回ごと指定の座標でヒントメソッドが呼ばれる
-     * ・８１回ヒントメソッドが呼ばれる
-     */
-    @Test
-    fun onTouchBoardByGameModeAndVerticalStand() {
-        val useCase = mock<SyogiLogicUseCase> {}
-        val view = mock<GameViewContact.View> {}
-        val presenter = GameLogicPresenter(view, useCase)
-        val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
-        turn.isAccessible = true
-        turn.set(presenter, true)
-        for (i in 1..9) {
-            for (j in 0..8) {
-                presenter.onTouchEventByGameMode(i, j)
-                verify(useCase, times(1)).setTouchHint(10 - i, j + 1)
-            }
-        }
-        verify(useCase, times(81)).setTouchHint(anyInt(), anyInt())
-    }
-
-    /**
-     * 対局モードでのタッチイベント
-     * 条件：上下に駒台が存在する状態で盤上をタッチ(1回目)
+     * 条件：上下に駒台が存在する状態で盤上をタッチ(2回目)
      * 期待値：
      *・１回ごと指定の座標でコマを動かすメソッドが呼ばれる
      * ・８１回コマを動かすメソッドが呼ばれる
      */
     @Test
     fun onTouchHintByGameModeAndHorizontalStand() {
+        val cell = Cell()
+        cell.hint = true
         val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn HINT
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
@@ -380,122 +355,266 @@ class GameLogicPresenterTest {
 
     /**
      * 対局モードでのタッチイベント
+     * 条件：上下に駒台が存在する状態で先手が後手の駒台をタップ
+     * 期待値：全てcancelメソッドが呼ばれる
+     */
+    @Test
+    fun onTouchWhiteStandByGameModeAndHorizontalStandAndBlack() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn BLACK
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val y = 0
+        for (x in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+            verify(useCase, times(x + 1)).cancel()
+        }
+    }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：上下に駒台が存在する状態で先手が先手の駒台をタップ
+     * 期待値：７回(歩、香、桂、銀、金、角、飛車)、持ち駒を使うメソッドが呼ばれること
+     */
+    @Test
+    fun onTouchBlackStandByGameModeAndHorizontalStandAndBlack() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn BLACK
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val y = 10
+        for (x in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+        }
+        verify(useCase, times(1)).setHintHoldPiece(Piece.FU, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KYO, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KEI, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.GIN, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KIN, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KAKU, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.HISYA, BLACK)
+    }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：上下に駒台が存在する状態で後手が先手の駒台をタップ
+     * 期待値：全てcancelメソッドが呼ばれる
+     */
+    @Test
+    fun onTouchBlackStandByGameModeAndHorizontalStandAndWhite() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn WHITE
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val y = 10
+        for (x in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+            verify(useCase, times(x + 1)).cancel()
+        }
+    }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：上下に駒台が存在する状態で後手が後手の駒台をタップ
+     * 期待値：７回(歩、香、桂、銀、金、角、飛車)、持ち駒を使うメソッドが呼ばれること
+     */
+    @Test
+    fun onTouchWhiteStandByGameModeAndHorizontalStandAndWhite() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn WHITE
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val y = 0
+        for (x in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+        }
+        verify(useCase, times(1)).setHintHoldPiece(Piece.FU, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KYO, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KEI, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.GIN, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KIN, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KAKU, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.HISYA, WHITE)
+    }
+
+    // endregion
+
+    // region 駒台が左右にある場合
+
+    /**
+     * 対局モードでのタッチイベント
      * 条件：左右に駒台が存在する状態で盤上をタッチ(1回目)
-     * 期待値
+     * 期待値：
+     * ・１回ごと指定の座標でヒントメソッドが呼ばれる
+     * ・８１回ヒントメソッドが呼ばれる
+     */
+    @Test
+    fun onTouchBoardByGameModeAndVerticalStand() {
+        val cell = Cell()
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        for (x in 1..9) {
+            for (y in 0..8) {
+                presenter.onTouchEventByGameMode(x, y)
+                verify(useCase, times(1)).setTouchHint(9 - (x - 1), y + 1)
+            }
+        }
+        verify(useCase, times(81)).setTouchHint(anyInt(), anyInt())
+    }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：左右に駒台が存在する状態で盤上をタッチ(2回目)
+     * 期待値：
      *・１回ごと指定の座標でコマを動かすメソッドが呼ばれる
      * ・８１回コマを動かすメソッドが呼ばれる
      */
     @Test
     fun onTouchHintByGameModeAndVerticalStand() {
+        val cell = Cell()
+        cell.hint = true
         val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn HINT
+            on { getCellInformation(anyInt(), anyInt()) } doReturn cell
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
         turn.isAccessible = true
         turn.set(presenter, true)
-        for (i in 1..9) {
-            for (j in 0..8) {
-                presenter.onTouchEventByGameMode(i, j)
-                verify(useCase, times(1)).setMove(10 - i, j + 1, false)
+        for (x in 1..9) {
+            for (y in 0..8) {
+                presenter.onTouchEventByGameMode(x, y)
+                verify(useCase, times(1)).setMove(9 - (x - 1), y + 1, false)
             }
         }
         verify(useCase, times(81)).setMove(anyInt(), anyInt(), any())
     }
 
-
     /**
      * 対局モードでのタッチイベント
-     * 条件：上下に駒台が存在する状態で盤外をタッチ(駒台+盤上含む99回タップ)
-     * 期待値：４回キャンセルメソッドが呼ばれる
+     * 条件：左右に駒台が存在する状態で先手が後手の駒台をタップ
+     * 期待値：全てcancelメソッドが呼ばれる
      */
     @Test
-    fun onTouchOutSideByGameModeAndHorizontalStand() {
+    fun onTouchWhiteStandByGameModeAndVerticalStandAndBlack() {
         val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn HINT
-        }
-        val view = mock<GameViewContact.View> {}
-        val presenter = GameLogicPresenter(view, useCase)
-        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
-        turn.isAccessible = true
-        turn.set(presenter, true)
-        for (i in 0..8) {
-            for (j in 0..10) {
-                presenter.onTouchEventByGameMode(i, j)
-            }
-        }
-        verify(useCase, times(4)).cancel()
-    }
-
-    /**
-     * 対局モードでのタッチイベント
-     * 条件：左右に駒台が存在する状態で盤外をタッチ(駒台+盤上含む99回タップ)
-     * 期待値：４回キャンセルメソッドが呼ばれる
-     */
-    @Test
-    fun onTouchOutsideByGameModeAndVerticalStand() {
-        val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn HINT
+            on { getTurn() } doReturn BLACK
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
         turn.isAccessible = true
         turn.set(presenter, true)
-        for (i in 0..10) {
-            for (j in 0..8) {
-                presenter.onTouchEventByGameMode(i, j)
-            }
+        val x = 0
+        for (y in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+            verify(useCase, times(y + 1)).cancel()
         }
-        verify(useCase, times(4)).cancel()
     }
 
     /**
      * 対局モードでのタッチイベント
-     * 条件：上下に駒台が存在する状態で駒台をタッチ
-     * 期待値：１６回駒台タッチメソッドが呼ばれる
+     * 条件：左右に駒台が存在する状態で先手が先手の駒台をタップ
+     * 期待値：７回(歩、香、桂、銀、金、角、飛車)、持ち駒を使うメソッドが呼ばれること
      */
     @Test
-    fun onTouchStandByGameModeAndHorizontalStand() {
+    fun onTouchBlackStandByGameModeAndVerticalStandAndBlack() {
         val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn BLACK
-        }
-        val view = mock<GameViewContact.View> {}
-        val presenter = GameLogicPresenter(view, useCase)
-        val turn: Field = presenter.javaClass.getDeclaredField("isHorizontalStand")
-        turn.isAccessible = true
-        turn.set(presenter, true)
-        for (i in 0..8) {
-            for (j in 0..10) {
-                presenter.onTouchEventByGameMode(i, j)
-            }
-        }
-        verify(useCase, times(14)).setHintHoldPiece(anyInt(), anyInt(), anyInt())
-    }
-
-    /**
-     * 対局モードでのタッチイベント
-     * 条件：左右に駒台が存在する状態で駒台をタッチ
-     * 期待値：１６回駒台タッチメソッドが呼ばれる
-     */
-    @Test
-    fun onTouchStandByGameModeAndVerticalStand() {
-        val useCase = mock<SyogiLogicUseCase> {
-            on { getCellTurn(anyInt(), anyInt()) } doReturn BLACK
+            on { getTurn() } doReturn BLACK
         }
         val view = mock<GameViewContact.View> {}
         val presenter = GameLogicPresenter(view, useCase)
         val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
         turn.isAccessible = true
         turn.set(presenter, true)
-        for (i in 0..10) {
-            for (j in 0..8) {
-                presenter.onTouchEventByGameMode(i, j)
-            }
+        val x = 10
+        for (y in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
         }
-        verify(useCase, times(14)).setHintHoldPiece(anyInt(), anyInt(), anyInt())
+        verify(useCase, times(1)).setHintHoldPiece(Piece.FU, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KYO, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KEI, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.GIN, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KIN, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KAKU, BLACK)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.HISYA, BLACK)
     }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：左右に駒台が存在する状態で後手が先手の駒台をタップ
+     * 期待値：全てcancelメソッドが呼ばれる
+     */
+    @Test
+    fun onTouchBlackStandByGameModeAndVerticalStandAndWhite() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn WHITE
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val x = 10
+        for (y in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+            verify(useCase, times(y + 1)).cancel()
+        }
+    }
+
+    /**
+     * 対局モードでのタッチイベント
+     * 条件：左右に駒台が存在する状態で後手が後手の駒台をタップ
+     * 期待値：７回(歩、香、桂、銀、金、角、飛車)、持ち駒を使うメソッドが呼ばれること
+     */
+    @Test
+    fun onTouchWhiteStandByGameModeAndVerticalStandAndWhite() {
+        val useCase = mock<SyogiLogicUseCase> {
+            on { getTurn() } doReturn WHITE
+        }
+        val view = mock<GameViewContact.View> {}
+        val presenter = GameLogicPresenter(view, useCase)
+        val turn: Field = presenter.javaClass.getDeclaredField("isVerticalStand")
+        turn.isAccessible = true
+        turn.set(presenter, true)
+        val x = 0
+        for (y in 0..8) {
+            presenter.onTouchEventByGameMode(x, y)
+        }
+        verify(useCase, times(1)).setHintHoldPiece(Piece.FU, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KYO, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KEI, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.GIN, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KIN, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.KAKU, WHITE)
+        verify(useCase, times(1)).setHintHoldPiece(Piece.HISYA, WHITE)
+    }
+
+    // endregion
+
+    // endregion
 
     // endregion
 

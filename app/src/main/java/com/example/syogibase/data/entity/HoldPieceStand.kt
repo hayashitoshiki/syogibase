@@ -13,11 +13,6 @@ class HoldPieceStand {
     )
     val pieceList: Map<Piece, Int> get() = _pieceList
 
-    // 持ち駒リストを返す
-    fun keys(): MutableSet<Piece> {
-        return _pieceList.keys
-    }
-
     // 持ち駒追加
     fun add(piece: Piece) {
         // 通常モードの場合
@@ -51,18 +46,18 @@ class HoldPieceStand {
         _pieceList.putAll(holdPieceBlack)
     }
 
-    //持ち駒台の座標からもしコマを取得していれば駒を取得(本当はよくない)
-    fun changeIntToPiece(i: Int): Piece {
-        when (i) {
-            2 -> if (pieceList[Piece.FU] != 0) return Piece.FU
-            3 -> if (pieceList[Piece.KYO] != 0) return Piece.KYO
-            4 -> if (pieceList[Piece.KEI] != 0) return Piece.KEI
-            5 -> if (pieceList[Piece.GIN] != 0) return Piece.GIN
-            6 -> if (pieceList[Piece.KIN] != 0) return Piece.KIN
-            7 -> if (pieceList[Piece.KAKU] != 0) return Piece.KAKU
-            8 -> if (pieceList[Piece.HISYA] != 0) return Piece.HISYA
+    // 持ち駒台から指定したコマを取得
+    fun getStandPiece(piece: Piece): Piece? {
+        when (piece) {
+            Piece.FU -> if (pieceList[Piece.FU] != 0) return Piece.FU
+            Piece.KYO -> if (pieceList[Piece.KYO] != 0) return Piece.KYO
+            Piece.KEI -> if (pieceList[Piece.KEI] != 0) return Piece.KEI
+            Piece.GIN -> if (pieceList[Piece.GIN] != 0) return Piece.GIN
+            Piece.KIN -> if (pieceList[Piece.KIN] != 0) return Piece.KIN
+            Piece.KAKU -> if (pieceList[Piece.KAKU] != 0) return Piece.KAKU
+            Piece.HISYA -> if (pieceList[Piece.HISYA] != 0) return Piece.HISYA
         }
-        return Piece.None
+        return null
     }
 
 }

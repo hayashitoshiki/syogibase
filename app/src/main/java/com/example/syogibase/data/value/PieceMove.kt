@@ -1,4 +1,4 @@
-package com.example.syogibase.data.entity
+package com.example.syogibase.data.value
 
 // 駒の動きをPieceMoveクラスを用いて格納
 

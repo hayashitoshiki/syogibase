@@ -2,22 +2,23 @@ package com.example.syogibase.domain
 
 import com.example.syogibase.data.entity.Cell
 import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.data.entity.GameResult
 import com.example.syogibase.data.entity.Piece
-import com.example.syogibase.util.Handicap
+import com.example.syogibase.data.value.GameResult
+import com.example.syogibase.data.value.Handicap
+import com.example.syogibase.data.value.Turn
 
 interface SyogiLogicUseCase {
 
     // region アクション
 
     // ターンを返す
-    fun getTurn(): Int
+    fun getTurn(): Turn
 
     // 駒落ち設定
-    fun setHandicap(turn: Int, handicap: Handicap)
+    fun setHandicap(turn: Turn, handicap: Handicap)
 
     // 持ち駒台設定
-    fun setHoldPiece(holdPiece: MutableMap<Piece, Int>, turn: Int)
+    fun setHoldPiece(holdPiece: MutableMap<Piece, Int>, turn: Turn)
 
     // 指定した盤面設定
     fun setBoard(customBoard: Array<Array<Cell>>)
@@ -29,7 +30,7 @@ interface SyogiLogicUseCase {
     fun setMove(x: Int, y: Int, evolution: Boolean)
 
     // 持ち駒を使う場合
-    fun setHintHoldPiece(x: Int, y: Int, kingTurn: Int)
+    fun setHintHoldPiece(piece: Piece, kingTurn: Turn)
 
     // キャンセル
     fun cancel()
@@ -41,11 +42,8 @@ interface SyogiLogicUseCase {
     // (駒の名前,手番,ヒントの表示)を返す
     fun getCellInformation(x: Int, y: Int): Cell
 
-    // マスの手番を返す
-    fun getCellTurn(x: Int, y: Int): Int
-
-    // 持ち駒を加工して返す
-    fun getPieceHand(turn: Int): MutableList<Pair<Piece, Int>>
+    // 持ち駒を返す
+    fun getPieceHand(turn: Turn): Map<Piece, Int>
 
     // endregion
 

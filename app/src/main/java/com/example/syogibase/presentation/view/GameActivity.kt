@@ -9,8 +9,9 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.example.syogibase.R
+import com.example.syogibase.data.value.BoardMode
+import com.example.syogibase.data.value.Turn
 import com.example.syogibase.presentation.contact.GameViewContact
-import com.example.syogibase.util.BoardMode
 
 
 class GameActivity : AppCompatActivity() {
@@ -32,7 +33,7 @@ class GameActivity : AppCompatActivity() {
         frame = this.findViewById(R.id.frame) as FrameLayout
         gameView = GameView(this)
         gameView.setGameEndListener(object : GameViewContact.GameEndListener {
-            override fun onGameEnd(winner: Int) {
+            override fun onGameEnd(winner: Turn?) {
                 AlertDialog.Builder(this@GameActivity)
                     .setTitle("終了")
                     .setMessage("勝ち")
@@ -80,7 +81,6 @@ class GameActivity : AppCompatActivity() {
     fun replay(v: View) {
         winView.visibility = View.GONE
         frame!!.removeViewAt(1)
-        //frame!!.removeView(winView)
         endView.visibility = View.GONE
         gameView.setBoardMove(BoardMode.REPLAY)
     }

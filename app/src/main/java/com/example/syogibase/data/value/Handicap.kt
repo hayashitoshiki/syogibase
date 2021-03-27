@@ -1,10 +1,4 @@
-package com.example.syogibase.util
-
-// ボード設定
-enum class BoardMode {
-    GAME,
-    REPLAY,
-}
+package com.example.syogibase.data.value
 
 // ハンデ
 enum class Handicap {
@@ -16,4 +10,3 @@ enum class Handicap {
     ROKUMAI,
     HATIMAI
 }
-
