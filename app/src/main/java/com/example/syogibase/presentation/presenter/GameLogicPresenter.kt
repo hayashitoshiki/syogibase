@@ -196,6 +196,7 @@ class GameLogicPresenter(
         }
     }
 
+    // 座標から持ち駒へ変換
     private fun changePieceByIndex(index: Int): Piece? {
         return when (index) {
             2 -> Piece.FU
@@ -259,7 +260,7 @@ class GameLogicPresenter(
 
     // リセット
     override fun reset() {
-        useCase.reset()
+        useCase.resetBoard()
     }
 
     // ハンデ設定

@@ -1,6 +1,8 @@
 package com.example.syogibase.data.value
 
-// ボード設定
+/**
+ * 将棋盤のモード設定の種類
+ */
 enum class BoardMode {
     GAME,
     REPLAY,

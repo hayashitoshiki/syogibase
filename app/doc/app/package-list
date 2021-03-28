@@ -1,0 +1,10 @@
+$dokka.format:gfm
+$dokka.linkExtension:md
+
+com.example.syogibase
+com.example.syogibase.data.entity
+com.example.syogibase.data.value
+com.example.syogibase.domain
+com.example.syogibase.presentation.contact
+com.example.syogibase.presentation.presenter
+com.example.syogibase.presentation.view

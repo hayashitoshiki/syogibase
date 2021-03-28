@@ -1,13 +1,14 @@
 package com.example.syogibase.data.entity
 
-//将棋盤定義クラス
-
 import com.example.syogibase.data.entity.Piece.*
 import com.example.syogibase.data.value.Handicap
 import com.example.syogibase.data.value.Turn
 import com.example.syogibase.data.value.Turn.BLACK
 import com.example.syogibase.data.value.Turn.WHITE
 
+/**
+ * 将棋盤
+ */
 class Board {
 
     // マスの数
@@ -60,7 +61,10 @@ class Board {
         }
     }
 
-    // カスタム初期値設定
+    /**
+     * 将棋盤を指定した盤面で設定
+     * @param customBoard 設定する盤面
+     */
     fun setBoard(customBoard: Array<Array<Cell>>) {
         for (i in 0 until COLS) {
             for (j in 0 until ROWS) {
@@ -69,7 +73,11 @@ class Board {
         }
     }
 
-    // 駒落ちセット
+    /**
+     * 駒落ちのハンデを設定
+     * @param turn ハンデ設定するマス
+     * @param handicap 設定するハンデ
+     */
     fun setHandicap(turn: Turn, handicap: Handicap) {
         when (turn) {
             BLACK -> {
@@ -121,7 +129,9 @@ class Board {
         }
     }
 
-    // 全てクリア
+    /**
+     * 全てのマスの情報をクリアする
+     */
     fun clear() {
         cells.forEach {
             it.forEach {
@@ -130,28 +140,45 @@ class Board {
         }
     }
 
-    // ヒントの総数を返す
+    /**
+     * コマを置ける場所の総数を返す
+     * @return コマを置ける場所の総数
+     */
     fun getCountByHint(): Int {
         var count = 0
         cells.forEach { count += it.filter { it.hint }.count() }
         return count
     }
 
-    // 全てのマスのヒントをリセットする
+    /**
+     * 全てのマスのヒントをリセット
+     */
     fun restHintAll() {
         cells.forEach { it.forEach { it.hint = false } }
     }
 
-    // 指定されたマスの値を取得
+    /**
+     * 指定されたマスの情報を取得
+     * @param x 取得するマスのX座標
+     * @param y 取得するマスのY座標
+     */
     fun getCell(x: Int, y: Int): Cell {
         return cells[x - 1][y - 1]
     }
 
-    // 指定されたマスの値を取得
+    /**
+     * 指定されたマスに動かせるか設定
+     * @param x 設定するマスのX座標
+     * @param y 設定するマスのY座標
+     * @param bool 動かせるかの有無
+     */
     fun setHint(x: Int, y: Int, bool: Boolean) {
         cells[x - 1][y - 1].hint = bool
     }
 
+    /**
+     * 将棋盤の全てのマスを返す
+     */
     fun getCells(): Array<Array<Cell>> {
         return cells
     }

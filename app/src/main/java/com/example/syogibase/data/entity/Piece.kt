@@ -2,8 +2,9 @@ package com.example.syogibase.data.entity
 
 import com.example.syogibase.data.value.PieceMove
 
-//将棋の駒格納クラス
-
+/**
+ * 将棋で使う駒の種類
+ */
 enum class Piece(val nameJP: String) {
     FU("歩"),
     TO("と"),
@@ -21,7 +22,10 @@ enum class Piece(val nameJP: String) {
     OU("王"),
     GYOKU("玉");
 
-    // 駒の動き方
+    /**
+     * 指定した駒を動きを返す
+     * @return 指定した駒の動き
+     */
     fun getMove(): Array<Array<PieceMove>> {
         when (this) {
             FU -> return arrayOf(
@@ -267,20 +271,28 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    //進化取得
+    /**
+     * 成ったときの駒を返す
+     * @return 成った後の駒
+     */
     fun evolution(): Piece {
         return when (this) {
-            FU -> TO
-            KEI -> N_KYO
-            KYO -> N_KYO
-            GIN -> N_GIN
-            HISYA -> RYU
-            KAKU -> UMA
-            else -> this
+            FU, TO -> TO
+            KEI, N_KEI -> N_KYO
+            KYO, N_KYO -> N_KYO
+            GIN, N_GIN -> N_GIN
+            HISYA, RYU -> RYU
+            KAKU, UMA -> UMA
+            KIN -> KIN
+            OU -> OU
+            GYOKU -> GYOKU
         }
     }
 
-    // 退化
+    /**
+     * 成る前の駒を返す
+     * @return 成る前の駒
+     */
     fun degeneration(): Piece {
         return when (this) {
             TO, FU -> FU
@@ -295,7 +307,10 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 成れる駒の分類
+    /**
+     * 駒が成ることができるか返す
+     * @return 成ることができるか
+     */
     fun isEvolution(): Boolean {
         return when (this) {
             FU, KEI, KYO, GIN, HISYA, KAKU -> true
@@ -303,7 +318,10 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 上へ動ける駒
+    /**
+     * １マス上に動けるか判定する
+     * @return １マス上に動けるか
+     */
     fun isUpMovePiece(): Boolean {
         return when (this) {
             FU, TO, KYO, N_KYO, GIN, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
@@ -311,7 +329,21 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 下へ動ける駒
+    /**
+     * ２マス以上上に動けるか判定する
+     * @return ２マス以上上に動けるか
+     */
+    fun isLongUpMovePiece(): Boolean {
+        return when (this) {
+            KYO, HISYA, RYU -> true
+            else -> false
+        }
+    }
+
+    /**
+     * １マス下に動けるか判定する
+     * @return １マス下に動けるか
+     */
     fun isDownMovePiece(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
@@ -319,7 +351,21 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 横へ動ける駒
+    /**
+     * ２マス以上下に動けるか判定する
+     * @return ２マス以上下に動けるか
+     */
+    fun isLongDownMovePiece(): Boolean {
+        return when (this) {
+            HISYA, RYU -> true
+            else -> false
+        }
+    }
+
+    /**
+     * １マス横に動けるか判定する
+     * @return １マス横に動けるか
+     */
     fun isLRMovePiece(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, KIN, OU, GYOKU, HISYA, RYU, UMA -> true
@@ -327,7 +373,10 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 横へ2マス以上動ける駒
+    /**
+     * ２マス以上横に動けるか判定する
+     * @return ２マス以上横に動けるか
+     */
     fun isLongLRMovePiece(): Boolean {
         return when (this) {
             HISYA, RYU -> true
@@ -335,7 +384,10 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 斜め上へ動ける駒
+    /**
+     * １マス斜め上に動けるか判定する
+     * @return １マス斜め上に動けるか
+     */
     fun isDiagonalUp(): Boolean {
         return when (this) {
             TO, N_KYO, N_KEI, N_GIN, GIN, KIN, OU, GYOKU, KAKU, RYU, UMA -> true
@@ -343,10 +395,24 @@ enum class Piece(val nameJP: String) {
         }
     }
 
-    // 斜め下へ動ける駒
+    /**
+     * １マス斜め下に動けるか判定する
+     * @return １マス斜め下に動けるか
+     */
     fun isDiagonalDown(): Boolean {
         return when (this) {
             GIN, OU, GYOKU, KAKU, RYU, UMA -> true
+            else -> false
+        }
+    }
+
+    /**
+     * ２マス以上斜めに動けるか判定する
+     * @return ２マス以上斜めに動けるか
+     */
+    fun isLongDiagonal(): Boolean {
+        return when (this) {
+            KAKU, UMA -> true
             else -> false
         }
     }

@@ -1,6 +1,8 @@
 package com.example.syogibase.data.value
 
-// ハンデ
+/**
+ * ハンデの種類
+ */
 enum class Handicap {
     HIDARIKYO,
     HISYA,

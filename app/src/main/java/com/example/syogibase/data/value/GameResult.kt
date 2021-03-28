@@ -1,13 +1,23 @@
 package com.example.syogibase.data.value
 
-// 判定結果を返すクラス
+/**
+ * 対局終了の判定結果の種類
+ */
 sealed class GameResult {
-    // 勝ち
+
+    /**
+     * 勝ち
+     * @param winner 勝利した手番
+     */
     data class Win(val winner: Turn) : GameResult()
 
-    // 引き分け
+    /**
+     * 引き分け
+     */
     object Draw : GameResult()
 
-    // まだ決着がついていない
+    /**
+     * まだ決着がついていない
+     */
     object Continue : GameResult()
 }

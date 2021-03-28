@@ -1,0 +1,8 @@
+[app](../../index.md) / [com.example.syogibase.data.entity](../index.md) / [GameLog](index.md) / [turn](./turn.md)
+
+# turn
+
+`val turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)
+
+動かす駒の手番
+
