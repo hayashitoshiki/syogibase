@@ -2,7 +2,7 @@
 
 # setHintHoldPiece
 
-`fun setHintHoldPiece(piece: `[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`fun setHintHoldPiece(piece: `[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
 
 Overrides [SyogiLogicUseCase.setHintHoldPiece](../-syogi-logic-use-case/set-hint-hold-piece.md)
 

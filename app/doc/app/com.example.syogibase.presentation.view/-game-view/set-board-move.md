@@ -2,4 +2,4 @@
 
 # setBoardMove
 
-`fun setBoardMove(mode: `[`BoardMode`](../../com.example.syogibase.data.value/-board-mode/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`fun setBoardMove(mode: `[`BoardMode`](../../com.example.syogibase.domain.value/-board-mode/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)

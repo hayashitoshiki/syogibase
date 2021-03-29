@@ -2,7 +2,7 @@
 
 # toX
 
-`val toX: `[`X`](../../com.example.syogibase.data.value/-x/index.md)
+`val toX: `[`X`](../../com.example.syogibase.domain.value/-x/index.md)
 
 動かす先のX座標
 

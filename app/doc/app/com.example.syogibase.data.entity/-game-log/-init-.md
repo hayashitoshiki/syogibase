@@ -2,7 +2,7 @@
 
 # &lt;init&gt;
 
-`GameLog(fromX: `[`X`](../../com.example.syogibase.data.value/-x/index.md)`, fromY: `[`Y`](../../com.example.syogibase.data.value/-y/index.md)`, piece: `[`Piece`](../-piece/index.md)`, turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`, toX: `[`X`](../../com.example.syogibase.data.value/-x/index.md)`, toY: `[`Y`](../../com.example.syogibase.data.value/-y/index.md)`, stealPiece: `[`Piece`](../-piece/index.md)`?, stealTurn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`?, evolution: `[`Boolean`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html)`)`
+`GameLog(fromX: `[`X`](../../com.example.syogibase.domain.value/-x/index.md)`, fromY: `[`Y`](../../com.example.syogibase.domain.value/-y/index.md)`, piece: `[`Piece`](../-piece/index.md)`, turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`, toX: `[`X`](../../com.example.syogibase.domain.value/-x/index.md)`, toY: `[`Y`](../../com.example.syogibase.domain.value/-y/index.md)`, stealPiece: `[`Piece`](../-piece/index.md)`?, stealTurn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`?, evolution: `[`Boolean`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html)`)`
 
 １手の指し手のログ
 

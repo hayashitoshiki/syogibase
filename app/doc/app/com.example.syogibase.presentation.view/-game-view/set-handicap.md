@@ -2,4 +2,4 @@
 
 # setHandicap
 
-`fun setHandicap(turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`, handicap: `[`Handicap`](../../com.example.syogibase.data.value/-handicap/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`fun setHandicap(turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`, handicap: `[`Handicap`](../../com.example.syogibase.domain.value/-handicap/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)

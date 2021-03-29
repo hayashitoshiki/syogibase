@@ -2,4 +2,4 @@
 
 # &lt;init&gt;
 
-`GameLogicPresenter(view: `[`View`](../../com.example.syogibase.presentation.contact/-game-view-contact/-view/index.md)`, useCase: `[`SyogiLogicUseCase`](../../com.example.syogibase.domain/-syogi-logic-use-case/index.md)`)`
+`GameLogicPresenter(view: `[`View`](../../com.example.syogibase.presentation.contact/-game-view-contact/-view/index.md)`, useCase: `[`SyogiLogicUseCase`](../../com.example.syogibase.domain.usecase/-syogi-logic-use-case/index.md)`)`

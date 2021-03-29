@@ -9,11 +9,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.example.syogibase.R
-import com.example.syogibase.data.entity.Board.Companion.COLS
-import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.data.value.BoardMode
-import com.example.syogibase.data.value.Handicap
-import com.example.syogibase.data.value.Turn
+import com.example.syogibase.domain.model.Board.Companion.COLS
+import com.example.syogibase.domain.model.GameLog
+import com.example.syogibase.domain.value.BoardMode
+import com.example.syogibase.domain.value.Handicap
+import com.example.syogibase.domain.value.Turn
 import com.example.syogibase.presentation.contact.GameViewContact
 import kotlinx.coroutines.*
 import org.koin.core.KoinComponent

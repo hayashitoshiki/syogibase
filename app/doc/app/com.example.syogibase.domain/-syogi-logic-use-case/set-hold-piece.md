@@ -2,7 +2,7 @@
 
 # setHoldPiece
 
-`abstract fun setHoldPiece(holdPiece: `[`MutableMap`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>, turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`abstract fun setHoldPiece(holdPiece: `[`MutableMap`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-mutable-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>, turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
 
 持ち駒の設定
 

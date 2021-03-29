@@ -1,12 +1,12 @@
 package com.example.syogibase.presentation.presenter
 
-import com.example.syogibase.data.entity.Cell
-import com.example.syogibase.data.entity.Piece
-import com.example.syogibase.data.value.BoardMode
-import com.example.syogibase.data.value.Turn.BLACK
-import com.example.syogibase.data.value.Turn.WHITE
-import com.example.syogibase.domain.SyogiLogicUseCase
-import com.example.syogibase.domain.SyogiLogicUseCaseImp
+import com.example.syogibase.domain.model.Cell
+import com.example.syogibase.domain.model.Piece
+import com.example.syogibase.domain.usecase.SyogiLogicUseCase
+import com.example.syogibase.domain.usecase.SyogiLogicUseCaseImp
+import com.example.syogibase.domain.value.BoardMode
+import com.example.syogibase.domain.value.Turn.BLACK
+import com.example.syogibase.domain.value.Turn.WHITE
 import com.example.syogibase.presentation.contact.GameViewContact
 import com.nhaarman.mockito_kotlin.*
 import org.junit.Test

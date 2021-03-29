@@ -2,7 +2,7 @@
 
 # getTurn
 
-`abstract fun getTurn(): `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)
+`abstract fun getTurn(): `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)
 
 現在の手番を返す
 

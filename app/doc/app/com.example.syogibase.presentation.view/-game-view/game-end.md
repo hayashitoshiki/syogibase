@@ -2,7 +2,7 @@
 
 # gameEnd
 
-`fun gameEnd(turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`?): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`fun gameEnd(turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`?): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
 
 Overrides [View.gameEnd](../../com.example.syogibase.presentation.contact/-game-view-contact/-view/game-end.md)
 

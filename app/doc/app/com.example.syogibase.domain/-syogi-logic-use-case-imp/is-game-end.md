@@ -2,7 +2,7 @@
 
 # isGameEnd
 
-`fun isGameEnd(): `[`GameResult`](../../com.example.syogibase.data.value/-game-result/index.md)
+`fun isGameEnd(): `[`GameResult`](../../com.example.syogibase.domain.value/-game-result/index.md)
 
 Overrides [SyogiLogicUseCase.isGameEnd](../-syogi-logic-use-case/is-game-end.md)
 

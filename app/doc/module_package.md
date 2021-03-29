@@ -1,16 +1,16 @@
 ### アーキテクチャ
-MVP + clean Architecture
-
-# Package com.example.syogibase.data
-Data層管理
-
-# Package com.example.syogibase.data.entity
-Entity管理
-
-# Package com.example.syogibase.data.value
-値オブジェクト管理
+MVP
 
 # Package com.example.syogibase.domain
+ドメイン層管理
+
+# Package com.example.syogibase.domain.model
+モデル管理
+
+# Package com.example.syogibase.domain.value
+値オブジェクト管理
+
+# Package com.example.syogibase.domain.usecase
 業務ロジック管理
 
 # Package com.example.syogibase.presentation
@@ -24,3 +24,6 @@ UIロジック管理
 
 # Package com.example.syogibase.presentation.view
 UI描画管理
+
+# Package com.example.syogibase.sample
+使用例

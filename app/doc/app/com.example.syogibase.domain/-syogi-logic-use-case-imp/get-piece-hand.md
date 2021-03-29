@@ -2,7 +2,7 @@
 
 # getPieceHand
 
-`fun getPieceHand(turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`): `[`Map`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>`
+`fun getPieceHand(turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`): `[`Map`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>`
 
 Overrides [SyogiLogicUseCase.getPieceHand](../-syogi-logic-use-case/get-piece-hand.md)
 

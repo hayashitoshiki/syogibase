@@ -2,7 +2,7 @@
 
 # gameEnd
 
-`abstract fun gameEnd(turn: `[`Turn`](../../../com.example.syogibase.data.value/-turn/index.md)`?): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`abstract fun gameEnd(turn: `[`Turn`](../../../com.example.syogibase.domain.value/-turn/index.md)`?): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
 
 対局終了通知
 

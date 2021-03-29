@@ -2,7 +2,7 @@
 
 # stealTurn
 
-`val stealTurn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`?`
+`val stealTurn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`?`
 
 動かした先にある駒の手番(駒がない場合はnull)
 

@@ -2,7 +2,7 @@
 
 # getPieceHand
 
-`abstract fun getPieceHand(turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`): `[`Map`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>`
+`abstract fun getPieceHand(turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`): `[`Map`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html)`<`[`Piece`](../../com.example.syogibase.data.entity/-piece/index.md)`, `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`>`
 
 指定した手番の持ち駒を返す
 

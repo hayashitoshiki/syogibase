@@ -2,7 +2,7 @@
 
 # getGameLog
 
-`fun getGameLog(): `[`List`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html)`<`[`GameLog`](../../com.example.syogibase.data.entity/-game-log/index.md)`>`
+`fun getGameLog(): `[`List`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html)`<`[`GameLog`](../../com.example.syogibase.domain.model/-game-log/index.md)`>`
 
 Overrides [Presenter.getGameLog](../../com.example.syogibase.presentation.contact/-game-view-contact/-presenter/get-game-log.md)
 

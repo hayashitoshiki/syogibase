@@ -1,9 +1,9 @@
 package com.example.syogibase.presentation.contact
 
-import com.example.syogibase.data.entity.GameLog
-import com.example.syogibase.data.value.BoardMode
-import com.example.syogibase.data.value.Handicap
-import com.example.syogibase.data.value.Turn
+import com.example.syogibase.domain.model.GameLog
+import com.example.syogibase.domain.value.BoardMode
+import com.example.syogibase.domain.value.Handicap
+import com.example.syogibase.domain.value.Turn
 
 /**
  * GameViewのContact定義

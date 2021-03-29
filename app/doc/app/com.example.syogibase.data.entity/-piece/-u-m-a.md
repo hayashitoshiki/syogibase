@@ -16,7 +16,7 @@
 |---|---|
 | [degeneration](degeneration.md) | `fun degeneration(): `[`Piece`](index.md)<br>成る前の駒を返す |
 | [evolution](evolution.md) | `fun evolution(): `[`Piece`](index.md)<br>成ったときの駒を返す |
-| [getMove](get-move.md) | `fun getMove(): `[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`PieceMove`](../../com.example.syogibase.data.value/-piece-move/index.md)`>>`<br>指定した駒を動きを返す |
+| [getMove](get-move.md) | `fun getMove(): `[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`PieceMove`](../../com.example.syogibase.domain.value/-piece-move/index.md)`>>`<br>指定した駒を動きを返す |
 | [isDiagonalDown](is-diagonal-down.md) | `fun isDiagonalDown(): `[`Boolean`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html)<br>１マス斜め下に動けるか判定する |
 | [isDiagonalUp](is-diagonal-up.md) | `fun isDiagonalUp(): `[`Boolean`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html)<br>１マス斜め上に動けるか判定する |
 | [isDownMovePiece](is-down-move-piece.md) | `fun isDownMovePiece(): `[`Boolean`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html)<br>１マス下に動けるか判定する |

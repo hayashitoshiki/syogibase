@@ -2,7 +2,7 @@
 
 # getMove
 
-`fun getMove(): `[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`PieceMove`](../../com.example.syogibase.data.value/-piece-move/index.md)`>>`
+`fun getMove(): `[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`Array`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html)`<`[`PieceMove`](../../com.example.syogibase.domain.value/-piece-move/index.md)`>>`
 
 指定した駒を動きを返す
 

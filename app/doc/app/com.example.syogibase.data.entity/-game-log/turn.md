@@ -2,7 +2,7 @@
 
 # turn
 
-`val turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)
+`val turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)
 
 動かす駒の手番
 

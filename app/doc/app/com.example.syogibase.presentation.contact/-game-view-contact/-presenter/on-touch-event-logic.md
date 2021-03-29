@@ -2,7 +2,7 @@
 
 # onTouchEventLogic
 
-`abstract fun onTouchEventLogic(x: `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`, y: `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`, mode: `[`BoardMode`](../../../com.example.syogibase.data.value/-board-mode/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
+`abstract fun onTouchEventLogic(x: `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`, y: `[`Int`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html)`, mode: `[`BoardMode`](../../../com.example.syogibase.domain.value/-board-mode/index.md)`): `[`Unit`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html)
 
 画面をタッチしたときのモード判定ロジック
 

@@ -2,7 +2,7 @@
 
 # getGameLog
 
-`abstract fun getGameLog(): `[`List`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html)`<`[`GameLog`](../../../com.example.syogibase.data.entity/-game-log/index.md)`>`
+`abstract fun getGameLog(): `[`List`](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html)`<`[`GameLog`](../../../com.example.syogibase.domain.model/-game-log/index.md)`>`
 
 棋譜を取得
 

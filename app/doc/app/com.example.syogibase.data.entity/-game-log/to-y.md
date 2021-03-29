@@ -2,7 +2,7 @@
 
 # toY
 
-`val toY: `[`Y`](../../com.example.syogibase.data.value/-y/index.md)
+`val toY: `[`Y`](../../com.example.syogibase.domain.value/-y/index.md)
 
 動かす先のY座標
 

@@ -2,7 +2,7 @@
 
 # fromX
 
-`val fromX: `[`X`](../../com.example.syogibase.data.value/-x/index.md)
+`val fromX: `[`X`](../../com.example.syogibase.domain.value/-x/index.md)
 
 動かす前のX座標
 

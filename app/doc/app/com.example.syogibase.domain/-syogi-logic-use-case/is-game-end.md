@@ -2,7 +2,7 @@
 
 # isGameEnd
 
-`abstract fun isGameEnd(): `[`GameResult`](../../com.example.syogibase.data.value/-game-result/index.md)
+`abstract fun isGameEnd(): `[`GameResult`](../../com.example.syogibase.domain.value/-game-result/index.md)
 
 対局終了判定を行う
 

@@ -10,9 +10,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name="com.example.syogibase.presentation.view.WinLoseModal"></activity>
-        <activity android:name="com.example.syogibase.presentation.view.GameActivity" />
-        <activity android:name="com.example.syogibase.presentation.view.MainActivity">
+        <activity android:name="com.example.syogibase.sample.WinLoseModal"></activity>
+        <activity android:name="com.example.syogibase.sample.GameActivity" />
+        <activity android:name="com.example.syogibase.sample.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

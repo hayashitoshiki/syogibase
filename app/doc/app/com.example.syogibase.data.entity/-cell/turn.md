@@ -2,7 +2,7 @@
 
 # turn
 
-`var turn: `[`Turn`](../../com.example.syogibase.data.value/-turn/index.md)`?`
+`var turn: `[`Turn`](../../com.example.syogibase.domain.value/-turn/index.md)`?`
 
 駒の手番の情報
 
